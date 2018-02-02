@@ -11,7 +11,7 @@ output:
 
 This files contains text mining analysis of the SPOOKY data.  You should be able to put this file in the `doc` folder of your `Project 1` repository and it should just run (provided you have `multiplot.R` in the `libs` folder and `spooky.csv` in the `data` folder).  
 
-####<u>Content Table</u>
+#### <u>Content Table</u>
 
 **Part 1 Data Preparation**  
 1.Setup the Libraries  
@@ -134,8 +134,8 @@ text(x=0, y=1, c("                                                             E
 
 I also plotted wordcloud for each author to compare their difference in word using. Compared to the overall word frequency,   
 **EAP used words "length","head","left","matter"** (EAP focused more on part of human? Has more word description about human's organ? like "haed","eye","feet","body","hand")  
-**HPL used words "house","heard","strange","street","told","door" ** (seems like HPL has more scenary description and created a backgroud place for the horrible story)  
-**MWS used words "love","heart","raymond","death","father","mind" **  (MWS used more inner feeling and more abstract word like "spirit","hope"...)  
+**HPL used words "house","heard","strange","street","told","door"** (seems like HPL has more scenary description and created a backgroud place for the horrible story)  
+**MWS used words "love","heart","raymond","death","father","mind"**  (MWS used more inner feeling and more abstract word like "spirit","hope"...)  
 more often. 
 
 #####TF-IDF
@@ -173,7 +173,7 @@ ggplot(tf_idf) +
 ```
 
 ## 2.Bigrams
-#####TF-IDF
+##### TF-IDF
 
 Let's start with those bigrams. We can extract all of those pairs in a very similar way as the individual words using our magical *tidytext* scissors. Here are a few random examples that will change every time we run this part:
 
@@ -274,7 +274,7 @@ multiplot(p1, p2, layout = layout)
 
 
 ## 3.Trigrams
-##### without stopwords
+##### Without stopwords
 
 *Three is a magical number. A terrible number. There were 3 witches to foretell Macbeth his blood-drenched destiny. The devil hound Cerberus has 3 heads. The number of the beast is 3 times the number 3+3. All these warning signs try to reach our concience as we prepare to repeat the same analysis we had done for bigrams on their cousins thrice removed: trigrams.*
 
@@ -335,7 +335,7 @@ We find:
 - Most importantly, though, we find out that Raymond was from [Galifrey](https://en.wikipedia.org/wiki/Time_Lord). That might explain why he's so popular and why he manages to exert such a strong influence on Shelley's writing.
 
 
-##### with stopwords
+##### With stopwords
 
 ```{r split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 14", out.width="100%"}
 # for later
@@ -433,7 +433,7 @@ generate_sentence <- function(word1, word2,authordata, sentencelength =5, debug 
 ## 1.Logistics Regression
 
 
-###Feature Engineering   
+### Feature Engineering   
 
 Here we add some Features to both the `train` and `test` datasets. The fatures are
 
@@ -480,7 +480,7 @@ spooky_feature = createFE(spooky)
 
 
 
-####Feature Visualization{.tabset}
+#### Feature Visualization{.tabset}
 
 We'll do some simple numerical summaries of the data to provide some nice visualizations.
 
