@@ -1,17 +1,36 @@
 ---
 title: "Some Simple SPOOKY Data Analysis"
-author: "Cindy Rush"
-date: "January 22, 2018"
+author: "Yujie Hu"
+date: "January 31, 2018"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 # Introduction
 
-This files contains text mining analysis of the SPOOKY data.  The goal is to remind ourselves of some of our basic tools for working with text data in `R` and also to practice reproducibility.  You should be able to put this file in the `doc` folder of your `Project 1` repository and it should just run (provided you have `multiplot.R` in the `libs` folder and `spooky.csv` in the `data` folder).
+This files contains text mining analysis of the SPOOKY data.  You should be able to put this file in the `doc` folder of your `Project 1` repository and it should just run (provided you have `multiplot.R` in the `libs` folder and `spooky.csv` in the `data` folder).  
 
-## Setup the libraries
+####<u>Content Table</u>
+
+**Part 1 Data Preparation**  
+1.Setup the Libraries  
+2.Read Data  
+3.Data Structure Overview   
+4.Data Cleaning  
+
+**Part 2 Data Exploraion**  
+1.Unigram  
+2.Bigram  
+3.Trigram  
+4.Sentence Generation  
+
+**Part 3 Data Prediction**  
+1.Logistics Regression    
+
+# Part 1 Data Preparation
+
+## 1.Setup the Libraries
 First we want to install and load libraries we need along the way.  Note that the following code is completely reproducible -- you don't need to add any code on your own to make it run.
 
 ```{r, message = F, warning = F}
@@ -38,15 +57,14 @@ library(ggridges)
 source("../libs/multiplot.R")
 ```
 
-## Read in the data
+## 2.Read Data
 The following code assumes that the dataset `spooky.csv` lives in a `data` folder (and that we are inside a `docs` folder).
 
 ```{r}
 spooky <- read.csv('../data/spooky.csv', as.is = TRUE)
 ```
 
-## An overview of the data structure and content
-
+## 3.Data Structure Overview
 Let's first remind ourselves of the structure of the data.
 ```{r}
 head(spooky)
@@ -60,95 +78,74 @@ sum(is.na(spooky))
 spooky$author <- as.factor(spooky$author)
 ```
 
-## Data Cleaning
-
+## 4.Data Cleaning
 We first use the `unnest_tokens()` function to drop all punctuation and transform all words into lower case.  At least for now, the punctuation isn't really important to our analysis -- we want to study the words.  In addition, `tidytext` contains a dictionary of stop words, like "and" or "next", that we will get rid of for our analysis, the idea being that the non-common words (...maybe the SPOOKY words) that the authors use will be more interesting.  If this is new to you, here's a textbook that can help: *[Text Mining with R; A Tidy Approach](https://www.tidytextmining.com)*.  It teaches the basic handling of natural language data in `R` using tools from the "tidyverse".  The tidy text format is a table with one token per row, where a token is a word.
 
 ```{r}
 spooky_wrd <- unnest_tokens(spooky, word, text)
-spooky_wrd <- anti_join(spooky_wrd, stop_words, by = "word")
-````
+spooky_wrdnew <- anti_join(spooky_wrd, stop_words, by = "word")
+```
 
-# Last Time and some More
+# Part 2 Data Exploration
+## 1.Unigram
+##### Word Frequency & Word Cloud 
+Now we study some of the most common words in the entire data set.  With the below code we plot the fifty most common words in the entire datset. We see that "time", "life", and "night" all appear frequently. 
 
-## Word Frequency
-
-Now we study some of the most common words in the entire data set.  With the below code we plot the fifty most common words in the entire datset. We see that "time", "life", and "night" all appear frequently.
-
-```{r}
-words <- count(group_by(spooky_wrd, word))$word
-freqs <- count(group_by(spooky_wrd, word))$n
-head(sort(freqs, decreasing = TRUE))
+```{r,message=FALSE,warning=FALSE}
+#Wordcloud for the entire dataset
+layout(matrix(c(1,1,1,2,3,4,5,5,5),3,3,byrow = T),heights = c(3,3,2))
+par(mar = c(0,0,0,0))
+words <- count(group_by(spooky_wrdnew, word))$word
+freqs <- count(group_by(spooky_wrdnew, word))$n
 wordcloud(words, freqs, max.words = 50, color = c("purple4", "red4", "black"))
-```
-
-We can compare the way the authors use the most frequent words too.
-
-```{r}
-author_words <- count(group_by(spooky_wrd, word, author))
-all_words    <- rename(count(group_by(spooky_wrd, word)), all = n)
-
-author_words <- left_join(author_words, all_words, by = "word")
-author_words <- arrange(author_words, desc(all))
-author_words <- ungroup(head(author_words, 81))
+#Wordcloud for each wuthor
+#Function to generate dataset for each author
+get_common_words_by_author <- function(x, author, remove.stopwords = FALSE){
+  if(remove.stopwords){
+    x <- x %>% dplyr::anti_join(stop_words)
+  }
   
-ggplot(author_words) +
-  geom_col(aes(reorder(word, all, FUN = min), n, fill = author)) +
-  xlab(NULL) +
-  coord_flip() +
-  facet_wrap(~ author) +
-  theme(legend.position = "none")
+  x[x$author == author,] %>%
+    dplyr::count(word, sort = TRUE)
+}
+words_EAP <- get_common_words_by_author(x = spooky_wrd,
+                           author = "EAP",
+                           remove.stopwords = TRUE)
+words_HPL <- get_common_words_by_author(x = spooky_wrd,
+                           author = "HPL",
+                           remove.stopwords = TRUE)
+words_MWS <- get_common_words_by_author(x = spooky_wrd,
+                           author = "MWS",
+                           remove.stopwords = TRUE)
+pal <- brewer.pal(6,"Dark2")
+pal1 <- pal[-(1)]
+pal2 <- brewer.pal(9,"BuGn")
+pal3 <- pal2[-(1:4)]
+#EAP
+wordcloud(words_EAP$word,words_EAP$n,max.words = 50,colors =pal)
+#HPL
+wordcloud(words_HPL$word,words_HPL$n,max.words = 50,colors =pal)
+#MWS
+wordcloud(words_MWS$word,words_MWS$n,max.words = 50,colors =pal)
+#Title
+plot.new()
+text(x=0, y=1, c("                                                             EAP","                                                                                                                                                                                                                               HPL ","                                                                                                                                                                                                                                                                                                                                                                                 MWS"))
 ```
 
-## Data Visualization
+I also plotted wordcloud for each author to compare their difference in word using. Compared to the overall word frequency,   
+**EAP used words "length","head","left","matter"** (EAP focused more on part of human? Has more word description about human's organ? like "haed","eye","feet","body","hand")  
+**HPL used words "house","heard","strange","street","told","door" ** (seems like HPL has more scenary description and created a backgroud place for the horrible story)  
+**MWS used words "love","heart","raymond","death","father","mind" **  (MWS used more inner feeling and more abstract word like "spirit","hope"...)  
+more often. 
 
-We'll do some simple numerical summaries of the data to provide some nice visualizations.
-
-```{r, message = FALSE}
-p1 <- ggplot(spooky) +
-      geom_bar(aes(author, fill = author)) +
-      theme(legend.position = "none")
-
-spooky$sen_length <- str_length(spooky$text)
-head(spooky$sen_length)
-
-
-p2 <- ggplot(spooky) +
-      geom_density_ridges(aes(sen_length, author, fill = author)) +
-      scale_x_log10() +
-      theme(legend.position = "none") +
-      labs(x = "Sentence length [# characters]")
-
-spooky_wrd$word_length <- str_length(spooky_wrd$word)
-head(spooky_wrd$word_length)
-
-p3 <- ggplot(spooky_wrd) +
-      geom_density(aes(word_length, fill = author), bw = 0.05, alpha = 0.3) +
-      scale_x_log10() +
-      theme(legend.position = "none") +
-      labs(x = "Word length [# characters]")
-
-layout <- matrix(c(1, 2, 1, 3), 2, 2, byrow = TRUE)
-multiplot(p1, p2, p3, layout = layout)
-```
-
-
-From the above plots we find:
-
-*
-
-*
-
-*
-
-
-## TF-IDF
+#####TF-IDF
+Too many arcane words in this section..... I have a hard time searching its meaning as an international student,Still Couldn't Understand what they want to convey....
 
 TF stands for term frequency or how often a word appears in a text and it is what is studied above in the word cloud. IDF stands for inverse document frequncy, and it is a way to pay more attention to words that are rare within the entire set of text data that is more sophisticated than simply removing stop words.  Multiplying these two values together calculates a term's tf-idf, which is the frequency of a term adjusted for how rarely it is used.  We'll use tf-idf as a heuristic index to indicate how frequently a certain author uses a word relative to the frequency that ll the authors use the word.  Therefore we will find words that are characteristic for a specific author, a good thing to have if we are interested in solving the author identification problem.
 
 ```{r}
 
-frequency <- count(spooky_wrd, author, word)
+frequency <- count(spooky_wrdnew, author, word)
 tf_idf    <- bind_tf_idf(frequency, word, author, n)
 
 tf_idf <- arrange(tf_idf, desc(tf_idf))
@@ -175,172 +172,454 @@ ggplot(tf_idf) +
   labs(y = "TF-IDF values")
 ```
 
-# Sentiment Analysis
+## 2.Bigrams
+#####TF-IDF
 
-We will use sentences as units of analysis for this tutorial, as sentences are natural languge units for organizing thoughts and ideas. For each sentence, we apply sentiment analysis using [NRC sentiment lexion](http://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm). "The NRC Emotion Lexicon is a list of English words and their associations with eight basic emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust) and two sentiments (negative and positive). The annotations were manually done by crowdsourcing."
-
-From *[Text Mining with R; A Tidy Approach](https://www.tidytextmining.com)*, "When human readers approach text, we use our understanding of the emotional intent of words to infer whether a section of text is positive or negative, or perhaps characterized by some other more nuanced emotion like surprise or disgust.  We can also use the tools of text mining to approach the emotional content of text programmatically."  This is the goal of sentiment analysis.
-
+Let's start with those bigrams. We can extract all of those pairs in a very similar way as the individual words using our magical *tidytext* scissors. Here are a few random examples that will change every time we run this part:
 
 ```{r}
-get_sentiments('nrc')
-sentiments <- inner_join(spooky_wrd, get_sentiments('nrc'), by = "word")
-
-count(sentiments, sentiment)
-count(sentiments, author, sentiment)
-
-ggplot(count(sentiments, sentiment)) + 
-  geom_col(aes(sentiment, n, fill = sentiment))
-
-ggplot(count(sentiments, author, sentiment)) + 
-  geom_col(aes(sentiment, n, fill = sentiment)) + 
-  facet_wrap(~ author) +
-  coord_flip() +
-  theme(legend.position = "none")
+t2 <- spooky %>% select(author, text) %>% unnest_tokens(bigram, text, token = "ngrams", n = 2)
+sample_n(t2, 5)
 ```
 
-
-## Comparing Positivity
-
-Let's only study the "positive" words.  Note that the amount of "postive" words attributed to each author varies greatly, and the relative frequency of "positive" words to the other sentiments also varies between authors.
+In order to filter out the stop words we need to *separate* the bigrams first, and then later *unite* them back together after the filtering. *Separate/unite* are also the names of the corresponding *dplyr* functions:
 
 ```{r}
-nrc_pos    <- filter(get_sentiments('nrc'), sentiment == "positive")
-nrc_pos
+bi_sep <- t2 %>%
+  separate(bigram, c("word1", "word2"), sep = " ")
 
-positive <- inner_join(spooky_wrd, nrc_pos, by = "word")
-head(positive)
-count(positive, word, sort = TRUE)
+bi_filt <- bi_sep %>%
+  filter(!word1 %in% stop_words$word) %>%
+  filter(!word2 %in% stop_words$word)
+
+# for later
+bigram_counts <- bi_filt %>%
+  count(word1, word2, sort = TRUE)
+
+t2 <- bi_filt %>%
+  unite(bigram, word1, word2, sep = " ")
 ```
 
-Now we plot a frequency comparison of these "positive" words.  Namely, we show the frequencies of the overall most frequently used positive words split between the three authors. 
+Now we can extract the TF-IDF values.
 
 ```{r}
-pos_words     <- count(group_by(positive, word, author))
-pos_words_all <- count(group_by(positive, word))
-
-pos_words <- left_join(pos_words, pos_words_all, by = "word")
-pos_words <- arrange(pos_words, desc(n.y))
-pos_words <- ungroup(head(pos_words, 81))
-
-# Note the above is the same as
-# pos_words <- pos_words  %>%
-#                left_join(pos_words_all, by = "word") %>%
-#                arrange(desc(n.y)) %>%
-#                head(81) %>%
-#                ungroup()
-
-ggplot(pos_words) +
-  geom_col(aes(reorder(word, n.y, FUN = min), n.x, fill = author)) +
-  xlab(NULL) +
-  coord_flip() +
-  facet_wrap(~ author) +
-  theme(legend.position = "none")
+t2_tf_idf <- t2 %>%
+  count(author, bigram) %>%
+  bind_tf_idf(bigram, author, n) %>%
+  arrange(desc(tf_idf))
 ```
 
+And then we plot the bigrams with the highest TF-IDF values per *author* and we see that ...
 
-# Topic Models
-
-Here's a good resource about topic modeling in R: <https://eight2late.wordpress.com/2015/09/29/a-gentle-introduction-to-topic-modeling-using-r/>.  Generally, topic modeling is a method for unsupervised classification of documents by themes, similar to clustering on numeric data.
-
-We're going to run LDA, or Latent Dirichlet Allocation, (note that LDA can also stand for Linear Discriminant Analysis, which we aren't studying here) which is one of the most popular algorithms for performing topic modelling.  As noted in the tidytext texbook (*[Text Mining with R; A Tidy Approach](https://www.tidytextmining.com)*), LDA makes two basic assumptions:
-
-* Every document is a mixture of topics. We imagine that each document may contain words from several topics in particular proportions. For example, in a two-topic model we could say “Document 1 is 90% topic A and 10% topic B, while Document 2 is 30% topic A and 70% topic B.”
-
-* Every topic is a mixture of words. For example, we could imagine a two-topic model of American news, with one topic for “politics” and one for “entertainment.” The most common words in the politics topic might be “President”, “Congress”, and “government”, while the entertainment topic may be made up of words such as “movies”, “television”, and “actor”. Importantly, words can be shared between topics; a word like “budget” might appear in both equally.
-
-Using these assumptions, LDA is a mathematical method for estimating both of these at the same time: finding the mixture of words that is associated with each topic, while also determining the mixture of topics that describes each document.
-
-
-We use the `topicmodels` package for this analysis.  Since the `topicmodels` package doesn't use the `tidytext` framework, we first convert our `spooky_wrd` dataframe into a document term matrix (DTM) matrix using `tidytext` tools.
-
-```{r}
-sent_wrd_freqs <- count(spooky_wrd, id, word)
-head(sent_wrd_freqs)
-spooky_wrd_tm <- cast_dtm(sent_wrd_freqs, id, word, n)
-spooky_wrd_tm
-length(unique(spooky_wrd$id))
-length(unique(spooky_wrd$word))
-```
-
-The matrix `spooky_wrd_tm` is a sparse matrix with 19467 rows, corresponding to the 19467 ids (or originally, sentences) in the `spooky_wrd` dataframe, and 24941 columns corresponding to the total number of unique words in the `spooky_wrd` dataframe.  So each row of `spooky_wrd_tm` corresponds to one of the original sentences.  The value of the matrix at a certain position is then the number of occurences of that word (determined by the column) in this specific sentence (determined by the row).  Since most sentence/word pairings don't occur, the matrix is sparse meaning there are many zeros.
-
-For LDA we must pick the number of possible topics.  Let's try 12, though this selection is admittedly arbitrary.
-
-```{r}
-spooky_wrd_lda    <- LDA(spooky_wrd_tm, k = 12, control = list(seed = 1234))
-spooky_wrd_topics <- tidy(spooky_wrd_lda, matrix = "beta")
-spooky_wrd_topics
-```
-
-We note that in the above we use the `tidy` function to extract the per-topic-per-word probabilities, called "beta" or $\beta$, for the model.  The final output has a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term “content” has a $1.619628 \times 10^{-5}$ probability of being generated from topic 4.  We visualizae the top terms (meaning the most likely terms associated with each topic) in the following.
-
-```{r}
-spooky_wrd_topics_5 <- ungroup(top_n(group_by(spooky_wrd_topics, topic), 5, beta))
-spooky_wrd_topics_5 <- arrange(spooky_wrd_topics_5, topic, -beta)
-spooky_wrd_topics_5 <- mutate(spooky_wrd_topics_5, term = reorder(term, beta))
-
-ggplot(spooky_wrd_topics_5) +
-  geom_col(aes(term, beta, fill = factor(topic)), show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free", ncol = 4) +
+```{r split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 9", out.width="100%"}
+t2_tf_idf %>%
+  arrange(desc(tf_idf)) %>%
+  mutate(bigram = factor(bigram, levels = rev(unique(bigram)))) %>%
+  group_by(author) %>%
+  top_n(10, tf_idf) %>%
+  ungroup() %>%  
+  ggplot(aes(bigram, tf_idf, fill = author)) +
+  geom_col() +
+  labs(x = NULL, y = "TF-IDF values") +
+  theme(legend.position = "none") +
+  facet_wrap(~ author, ncol = 3, scales = "free") +
   coord_flip()
 ```
-In the above, we see that the first topic is characterized by words like "love", "earth", and "words" while the third topic includes the word "thousand", and the fifth topic the word "beauty".  Note that the words "eyes" and "time" appear in many topics.  This is the advantage to topic modelling as opposed to clustering when using natural language -- often a word may be likely to appear in documents characterized by multiple topics.
 
-We can also study terms that have the greatest difference in probabilities between the topics, ignoring the words that are shared with similar frequency between topics. We choose only the first 3 topics as example and visualise the differences by plotting log ratios: $log_{10}(\beta \text{ of topic x }/ \beta \text{ of topic y})$. So if a word is 10 times more frequent in topic x the log ratio will be 1, whereas it will be -1 if the word is 10 times more frequent in topic y. 
+Um... I have the indistinct feeling that both Poe and Lovecraft are laughing at us. If there is only one thing in the world that should make you feel uneasy, it's probably laughter from those two.
+
+We also find:
+
+- Besides cruel humour, for Poe it's all about "chess players" and "tea pots". We've also got a few more names and, apparently, a fair share of "Orang Utan" appearances.
+
+- Lovecraft sets the scence with "ancient houses" and "shunned houses" during the "seventeenth century". Also he has a couple of characteristic character names.
+
+- So has Mary Shelly, who seems to really like "Lord Raymond". Well, everybody loves Raymond, don't they? We also find a few turns of phrase that are typical for her, such as "fellow creatures", "hours passed", or "ill fated".  *Let's hope that the latter is not an omen for our own expedition into the heart of the darkness ...*
+
+##### First two words(used for sentence generation)
+
 
 ```{r}
-spooky_wrd_topics <- mutate(spooky_wrd_topics, topic = paste0("topic", topic))
-spooky_wrd_topics <- spread(spooky_wrd_topics, topic, beta)
+spooky$first_two<-word(spooky$text, 1,2, sep=" ")
+spooky_first_two<-spooky%>%
+  count(author,first_two)%>%
+  arrange(desc(n,author))
 
-spooky_wrd_topics_12 <- filter(spooky_wrd_topics, topic2 > .001 | topic3 > .001)
-spooky_wrd_topics_12 <- mutate(spooky_wrd_topics_12, log_ratio = log10(topic2 / topic1))
-spooky_wrd_topics_12 <- group_by(spooky_wrd_topics_12, direction = log_ratio > 0)
-spooky_wrd_topics_12 <- ungroup(top_n(spooky_wrd_topics_12, 5, abs(log_ratio)))
-spooky_wrd_topics_12 <- mutate(spooky_wrd_topics_12, term = reorder(term, log_ratio))
+spooky_first_two1 <- ungroup(top_n(group_by(spooky_first_two, author), 20, n))
 
-p1 <- ggplot(spooky_wrd_topics_12) +
-      geom_col(aes(term, log_ratio, fill = log_ratio > 0)) +
-      theme(legend.position = "none") +
-      labs(y = "Log ratio of beta in topic 2 / topic 1") +
-      coord_flip()
+#layout(matrix(c(1,2),2,1,byrow = T),heights = c(2,3))
+#par(mar = c(0,0,0,0))
+#par(mfrow=c(2,1))
+p1<-spooky_first_two1 %>%
+  ggplot(aes(reorder(first_two,n), n, fill = author), position = position_stack(reverse = TRUE)) +
+  geom_col() +
+  labs(x = NULL, y = "Number of Appearance") +
+  theme(legend.position = "none",axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9)) 
 
+p2<-spooky_first_two1 %>%
+  ggplot(aes(reorder(first_two,n), n, fill = author), position = position_stack(reverse = TRUE)) +
+  geom_col() +
+  labs(x = NULL, y = "Number of Appearance") +
+  theme(legend.position = "none")+
+  facet_wrap(~ author, ncol = 3, scales = "free") +
+  coord_flip()
 
-spooky_wrd_topics_23 <- filter(spooky_wrd_topics, topic2 > .001 | topic3 > .001)
-spooky_wrd_topics_23 <- mutate(spooky_wrd_topics_23, log_ratio = log10(topic3 / topic2))
-spooky_wrd_topics_23 <- group_by(spooky_wrd_topics_23, direction = log_ratio > 0)
-spooky_wrd_topics_23 <- ungroup(top_n(spooky_wrd_topics_23, 5, abs(log_ratio)))
-spooky_wrd_topics_23 <- mutate(spooky_wrd_topics_23, term = reorder(term, log_ratio))
-
-p2 <- ggplot(spooky_wrd_topics_23) +
-      geom_col(aes(term, log_ratio, fill = log_ratio > 0)) +
-      theme(legend.position = "none") +
-      labs(y = "Log ratio of beta in topic 3 / topic 2") +
-      coord_flip()
-
-spooky_wrd_topics_13 <- filter(spooky_wrd_topics, topic3 > .001 | topic1 > .001)
-spooky_wrd_topics_13 <- mutate(spooky_wrd_topics_13, log_ratio = log10(topic3 / topic1))
-spooky_wrd_topics_13 <- group_by(spooky_wrd_topics_13, direction = log_ratio > 0)
-spooky_wrd_topics_13 <- ungroup(top_n(spooky_wrd_topics_13, 5, abs(log_ratio)))
-spooky_wrd_topics_13 <- mutate(spooky_wrd_topics_13, term = reorder(term, log_ratio))
-
-p3 <- ggplot(spooky_wrd_topics_13) +
-      geom_col(aes(term, log_ratio, fill = log_ratio > 0)) +
-      theme(legend.position = "none") +
-      labs(y = "Log ratio of beta in topic 3 / topic 2") +
-      coord_flip()
+layout <- matrix(c(1, 2), 2, 1, byrow = TRUE)
+multiplot(p1, p2, layout = layout)
 
 
-layout <- matrix(c(1,2,3), 3, 1, byrow = TRUE)
-multiplot(p1, p2, p3, layout = layout)
+
 ```
 
 
-Much of the above work was adapted from this post: <https://www.kaggle.com/headsortails/treemap-house-of-horror-spooky-eda-lda-features>.  It also has some other ideas about how to analyze the spooky data that we didn't have time to cover in the tutorial.
 
-# Readings for NLP with Python
+## 3.Trigrams
+##### without stopwords
 
-+ [Natural Language Processing with Python](http://www.nltk.org/book/)
-+ [A shorter tutorial](https://www.digitalocean.com/community/tutorials/how-to-work-with-language-data-in-python-3-using-the-natural-language-toolkit-nltk)
-+ [Sentiment analysis](https://pythonspot.com/en/python-sentiment-analysis/)
-+ [Topic modeling](https://medium.com/@aneesha/topic-modeling-with-scikit-learn-e80d33668730)
+*Three is a magical number. A terrible number. There were 3 witches to foretell Macbeth his blood-drenched destiny. The devil hound Cerberus has 3 heads. The number of the beast is 3 times the number 3+3. All these warning signs try to reach our concience as we prepare to repeat the same analysis we had done for bigrams on their cousins thrice removed: trigrams.*
+
+*Blind for knowledge, yielding to the call of power just like the sorcerer's apprentice, we continue our study. We crave to know more. A little spark of reason and self-preservation is trying to make itself heard against the raging thirst in our brains, but it burns ever weaker as the candle, is it still a candle?, shines brighter and brighter.*
+
+Extracting trigrams follows the same procedure as for bigrams. Again we filter out stop words and include a few random examples:
+
+```{r}
+t3 <- spooky %>% select(author, text) %>% unnest_tokens(trigram, text, token = "ngrams", n = 3)
+
+tri_sep <- t3 %>%
+  separate(trigram, c("word1", "word2", "word3"), sep = " ")
+
+tri_filt <- tri_sep %>%
+  filter(!word1 %in% stop_words$word) %>%
+  filter(!word2 %in% stop_words$word) %>%
+  filter(!word3 %in% stop_words$word)
+
+# for later
+trigram_counts <- tri_filt %>%
+  count(word1, word2, word3, sort = TRUE)
+
+t3 <- tri_filt %>%
+  unite(trigram, word1, word2, word3, sep = " ")
+
+sample_n(t3, 5)
+```
+
+And here is the corresponding TF-IDF plot for the most characteristic terms:
+
+```{r split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 14", out.width="100%"}
+t3_tf_idf <- t3 %>%
+  count(author, trigram) %>%
+  bind_tf_idf(trigram, author, n) %>%
+  arrange(desc(tf_idf))
+
+t3_tf_idf %>%
+  arrange(desc(tf_idf)) %>%
+  mutate(trigram = factor(trigram, levels = rev(unique(trigram)))) %>%
+  group_by(author) %>%
+  top_n(5, tf_idf) %>%
+  ungroup() %>%  
+  ggplot(aes(trigram, tf_idf, fill = author)) +
+  geom_col() +
+  labs(x = NULL, y = "TF-IDF values") +
+  theme(legend.position = "none") +
+  facet_wrap(~ author, ncol = 3, scales = "free") +
+  coord_flip()
+```
+
+
+We find:
+
+- More scary laughter and characteristic names from Poe and Lovecraft. Feel free to admit that you also read "Eric Moreland Clap**ton**" at first glance in HPL's list. I like the imagery of a "horned waning moon".
+
+- Curiously, Mary Shelley does not seem to have particularly typical phrases she repeats more often than others. The ones she does use suggest a penchant for body language, especially the eyes.
+
+- Most importantly, though, we find out that Raymond was from [Galifrey](https://en.wikipedia.org/wiki/Time_Lord). That might explain why he's so popular and why he manages to exert such a strong influence on Shelley's writing.
+
+
+##### with stopwords
+
+```{r split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 14", out.width="100%"}
+# for later
+trigram_counts2 <- tri_sep %>%
+  count(word1, word2, word3, sort = TRUE)
+
+t31 <- tri_sep %>%
+  unite(trigram, word1, word2, word3, sep = " ")
+
+t3_tf_idf1 <- t31 %>%
+  count(author, trigram) %>%
+  bind_tf_idf(trigram, author, n) %>%
+  arrange(desc(tf_idf))
+
+t3_tf_idf1 %>%
+  arrange(desc(tf_idf)) %>%
+  mutate(trigram = factor(trigram, levels = rev(unique(trigram)))) %>%
+  group_by(author) %>%
+  top_n(5, tf_idf) %>%
+  ungroup() %>%  
+  ggplot(aes(trigram, tf_idf, fill = author)) +
+  geom_col() +
+  labs(x = NULL, y = "TF-IDF values") +
+  theme(legend.position = "none") +
+  facet_wrap(~ author, ncol = 3, scales = "free") +
+  coord_flip()
+```
+
+
+## 4.Sentence generation
+
+```{r}
+##trigram of authors
+trigrams_EAP <- spooky %>%
+        filter(author == "EAP") %>%
+        unnest_tokens(trigram, text, token = "ngrams",to_lower = TRUE, n= 3) %>%
+        separate(trigram, c("word1", "word2", "word3"), sep = " ") %>%
+        count(word1, word2,word3, sort = TRUE)
+trigrams_HPL <- spooky %>%
+        filter(author == "HPL") %>%
+        unnest_tokens(trigram, text, token = "ngrams",to_lower = TRUE, n= 3) %>%
+        separate(trigram, c("word1", "word2", "word3"), sep = " ") %>%
+        count(word1, word2,word3, sort = TRUE)
+trigrams_MWS <- spooky %>%
+        filter(author == "MWS") %>%
+        unnest_tokens(trigram, text, token = "ngrams",to_lower = TRUE, n= 3) %>%
+        separate(trigram, c("word1", "word2", "word3"), sep = " ") %>%
+        count(word1, word2,word3, sort = TRUE)
+
+##may be a grap here about 
+
+##sentence generator
+return_third_word <- function( woord1, woord2,authordata){
+        woord <- authordata %>%
+                filter_(~word1 == woord1, ~word2 == woord2) %>%
+                sample_n(1, weight = n) %>%
+                .[["word3"]]
+        if(length(woord) == 0){
+                bleh <- filter_(authordata, ~word1 == woord2) %>%
+                        sample_n(1, weight = n)
+                warning("no word found, adding ", bleh, "to", woord1 , woord2)
+                woord <- bleh
+        }
+        woord
+}
+generate_sentence <- function(word1, word2,authordata, sentencelength =5, debug =FALSE){
+        #input validation
+        if(sentencelength <3)stop("I need more to work with")
+        sentencelength <- sentencelength -2
+        # starting
+        sentence <- c(word1, word2)
+        woord1 <- word1
+        woord2 <- word2
+        for(i in seq_len(sentencelength)){
+                if(debug == TRUE)print(i)
+                word <- return_third_word( woord1, woord2, authordata )
+                sentence <- c(sentence, word)
+                woord1 <- woord2
+                woord2 <- word
+        }
+        output <-paste(sentence, collapse = " ")
+        output
+}
+#generate_sentence("the", "man",trigrams_EAP, 15)
+#generate_sentence("the", "man",trigrams_HPL, 15)
+#generate_sentence("the", "man",trigrams_MWS, 15)
+
+## find the first two world used most frequently by author.
+## compile their psycho profile starting with their sanguan life world man value
+
+```
+
+# Part 3 Data Prediction
+
+## 1.Logistics Regression
+
+
+###Feature Engineering   
+
+Here we add some Features to both the `train` and `test` datasets. The fatures are
+
+* Number of commas         
+
+* Number of semicolons         
+
+* Number of colons        
+
+* Number of blanks       
+
+* Number of others        
+
+* Number of words beginning with Capitals      
+
+* Number of words with Capitals                 
+
+
+All these features have been borrowed from Kaggler *jayjay* 's kernel found [here](https://www.kaggle.com/jayjay75/text2vec-glmnet). Great work jayjay!       
+
+
+
+```{r,message=FALSE,warning=FALSE}
+
+createFE = function(ds)
+{
+  ds = ds %>%
+  mutate(Ncommas = str_count(ds$text, ",")) %>%
+  mutate(Nsemicolumns = str_count(ds$text, ";")) %>%
+  mutate(Ncolons = str_count(ds$text, ":")) %>%
+  mutate(Nblank = str_count(ds$text, " ")) %>%
+  mutate(Nother = str_count(ds$text, "[\\.\\.]")) %>%
+  mutate(Ncapitalfirst = str_count(ds$text, " [A-Z][a-z]")) %>%
+  mutate(Ncapital = str_count(ds$text, "[A-Z]")) %>%
+  mutate(Nquestion = str_count(ds$text,"\\?")) 
+  ## none %>% mutate(Nexclamation = str_count(ds$text,"\\!"))
+  
+  return(ds)
+}
+
+spooky_feature = createFE(spooky)
+
+```
+
+
+
+####Feature Visualization{.tabset}
+
+We'll do some simple numerical summaries of the data to provide some nice visualizations.
+
+##### Sentence Length(Characteristics)
+```{r, message = FALSE}
+spooky$sen_length <- str_length(spooky$text)
+head(spooky$sen_length)
+
+p2 <- ggplot(spooky) +
+      geom_density_ridges(aes(sen_length, author, fill = author)) +
+      scale_x_log10() +
+      theme(legend.position = "none") +
+      labs(x = "Sentence length [# characters]")
+
+
+```
+
+##### Word Length
+
+```{r}
+spooky_wrd$word_length <- str_length(spooky_wrd$word)
+#head(spooky_wrd$word_length)
+
+p3 <- ggplot(spooky_wrd) +
+      geom_density(aes(word_length, fill = author), bw = 0.05, alpha = 0.3) +
+      scale_x_log10() +
+      theme(legend.position = "none") +
+      labs(x = "Word length [# characters]")
+```
+
+##### Authors and Commas
+
+The bar plot shows the authors with the Total Number of Commas used by them.          
+
+```{r,message=FALSE,warning=FALSE}
+fillColor = "#FFA07A"
+fillColor2 = "#F1C40F"
+
+spooky_feature %>%
+  group_by(author) %>%
+  summarise(SumCommas = sum(Ncommas,na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(author = reorder(author,SumCommas)) %>%
+  
+  ggplot(aes(x = author,y = SumCommas)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor2) +
+  geom_text(aes(x = author, y = 1, label = paste0("(",SumCommas,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'author', 
+       y = 'Commas', 
+       title = 'author and Total Number of Commas') +
+  coord_flip() + 
+  theme_bw()
+
+
+## Be careful because EAP appeared more ofen than others(there are more EAP sentenes)
+
+```
+
+##### Authors and Semicolons
+
+The bar plot shows the authors with the Total Number of SemiColons used by them.          
+
+```{r,message=FALSE,warning=FALSE}
+
+spooky_feature %>%
+  group_by(author) %>%
+  summarise(SumSemiColons = sum(Nsemicolumns,na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(author = reorder(author,SumSemiColons)) %>%
+  
+  ggplot(aes(x = author,y = SumSemiColons)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor) +
+  geom_text(aes(x = author, y = 1, label = paste0("(",SumSemiColons,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'author', 
+       y = 'SemiColons', 
+       title = 'author and Total Number of SemiColons') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+##### Authors and Colons
+
+The bar plot shows the authors with the Total Number of Colons used by them.          
+
+```{r,message=FALSE,warning=FALSE}
+
+spooky_feature %>%
+  group_by(author) %>%
+  summarise(SumColons = sum(Ncolons,na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(author = reorder(author,SumColons)) %>%
+  
+  ggplot(aes(x = author,y = SumColons)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor) +
+  geom_text(aes(x = author, y = 1, label = paste0("(",SumColons,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'author', 
+       y = 'Colons', 
+       title = 'author and Total Number of Colons') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+##### Authors and Capital
+
+The bar plot shows the authors with the Total Number of Capital letters used by them.          
+
+```{r,message=FALSE,warning=FALSE}
+
+spooky_feature %>%
+  group_by(author) %>%
+  summarise(SumCapital = sum(Ncapital,na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(author = reorder(author,SumCapital)) %>%
+  
+  ggplot(aes(x = author,y = SumCapital)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor) +
+  geom_text(aes(x = author, y = 1, label = paste0("(",SumCapital,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'author', 
+       y = 'Capital Letters', 
+       title = 'author and Total Number of  Capital Letters') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+```{r}
+#spooky_wrdnew <- anti_join(spooky_wrd, stop_words, by = "word")
+#bi_filt <- bi_sep %>%
+ # filter(!word1 %in% stop_words$word) %>%
+  #filter(!word2 %in% stop_words$word)
+```
+
