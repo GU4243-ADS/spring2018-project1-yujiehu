@@ -3,8 +3,8 @@ title: "Some Simple SPOOKY Data Analysis"
 author: "Yujie Hu"
 date: "January 31, 2018"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 # Introduction
@@ -23,12 +23,14 @@ This files contains text mining analysis of the SPOOKY data.  You should be able
 1.Unigram  
 2.Bigram  
 3.Trigram  
-4.Sentence Generation  
+4.Sentence Generation    
+5.Feature Engineering
 
 **Part 3 Data Prediction**  
 1.Logistics Regression    
+2.LDA Topic Modeling
 
-# Part 1 Data Preparation
+# Part 1 Data Preparation{.tabset}
 
 ## 1.Setup the Libraries
 First we want to install and load libraries we need along the way.  Note that the following code is completely reproducible -- you don't need to add any code on your own to make it run.
@@ -87,8 +89,8 @@ spooky_wrdnew <- anti_join(spooky_wrd, stop_words, by = "word")
 ```
 
 # Part 2 Data Exploration
-## 1.Unigram
-##### Word Frequency & Word Cloud 
+## 1.Unigram{.tabset}
+### Word Frequency & Word Cloud 
 Now we study some of the most common words in the entire data set.  With the below code we plot the fifty most common words in the entire datset. We see that "time", "life", and "night" all appear frequently. 
 
 ```{r,message=FALSE,warning=FALSE}
@@ -133,12 +135,13 @@ text(x=0, y=1, c("                                                             E
 ```
 
 I also plotted wordcloud for each author to compare their difference in word using. Compared to the overall word frequency,   
-**EAP used words "length","head","left","matter"** (EAP focused more on part of human? Has more word description about human's organ? like "haed","eye","feet","body","hand")  
-**HPL used words "house","heard","strange","street","told","door"** (seems like HPL has more scenary description and created a backgroud place for the horrible story)  
-**MWS used words "love","heart","raymond","death","father","mind"**  (MWS used more inner feeling and more abstract word like "spirit","hope"...)  
+* **EAP used words "length","head","left","matter"** (EAP focused more on part of human? Has more word description about human's organ? like "haed","eye","feet","body","hand")  
+* **HPL used words "house","heard","strange","street","told","door"** (seems like HPL has more scenary description and created a backgroud place for the horrible story)  
+* **MWS used words "love","heart","raymond","death","father","mind"**  (MWS used more inner feeling and more abstract word like "spirit","hope"...)  
 more often. 
 
-#####TF-IDF
+### TF-IDF
+
 Too many arcane words in this section..... I have a hard time searching its meaning as an international student,Still Couldn't Understand what they want to convey....
 
 TF stands for term frequency or how often a word appears in a text and it is what is studied above in the word cloud. IDF stands for inverse document frequncy, and it is a way to pay more attention to words that are rare within the entire set of text data that is more sophisticated than simply removing stop words.  Multiplying these two values together calculates a term's tf-idf, which is the frequency of a term adjusted for how rarely it is used.  We'll use tf-idf as a heuristic index to indicate how frequently a certain author uses a word relative to the frequency that ll the authors use the word.  Therefore we will find words that are characteristic for a specific author, a good thing to have if we are interested in solving the author identification problem.
@@ -172,8 +175,8 @@ ggplot(tf_idf) +
   labs(y = "TF-IDF values")
 ```
 
-## 2.Bigrams
-##### TF-IDF
+## 2.Bigrams{.tabset}
+### TF-IDF
 
 Let's start with those bigrams. We can extract all of those pairs in a very similar way as the individual words using our magical *tidytext* scissors. Here are a few random examples that will change every time we run this part:
 
@@ -211,7 +214,7 @@ t2_tf_idf <- t2 %>%
 
 And then we plot the bigrams with the highest TF-IDF values per *author* and we see that ...
 
-```{r split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 9", out.width="100%"}
+```{r split=FALSE, fig.align = 'default', warning = FALSE}
 t2_tf_idf %>%
   arrange(desc(tf_idf)) %>%
   mutate(bigram = factor(bigram, levels = rev(unique(bigram)))) %>%
@@ -236,8 +239,7 @@ We also find:
 
 - So has Mary Shelly, who seems to really like "Lord Raymond". Well, everybody loves Raymond, don't they? We also find a few turns of phrase that are typical for her, such as "fellow creatures", "hours passed", or "ill fated".  *Let's hope that the latter is not an omen for our own expedition into the heart of the darkness ...*
 
-##### First two words(used for sentence generation)
-
+### First Two Words(Will be used for sentence generation)
 
 ```{r}
 spooky$first_two<-word(spooky$text, 1,2, sep=" ")
@@ -273,8 +275,8 @@ multiplot(p1, p2, layout = layout)
 
 
 
-## 3.Trigrams
-##### Without stopwords
+## 3.Trigrams{.tabset}
+### Without Stopwords
 
 *Three is a magical number. A terrible number. There were 3 witches to foretell Macbeth his blood-drenched destiny. The devil hound Cerberus has 3 heads. The number of the beast is 3 times the number 3+3. All these warning signs try to reach our concience as we prepare to repeat the same analysis we had done for bigrams on their cousins thrice removed: trigrams.*
 
@@ -305,7 +307,7 @@ sample_n(t3, 5)
 
 And here is the corresponding TF-IDF plot for the most characteristic terms:
 
-```{r split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 14", out.width="100%"}
+```{r split=FALSE, fig.align = 'default', warning = FALSE}
 t3_tf_idf <- t3 %>%
   count(author, trigram) %>%
   bind_tf_idf(trigram, author, n) %>%
@@ -335,9 +337,9 @@ We find:
 - Most importantly, though, we find out that Raymond was from [Galifrey](https://en.wikipedia.org/wiki/Time_Lord). That might explain why he's so popular and why he manages to exert such a strong influence on Shelley's writing.
 
 
-##### With stopwords
+### With Stopwords
 
-```{r split=FALSE, fig.align = 'default', warning = FALSE, fig.cap ="Fig. 14", out.width="100%"}
+```{r split=FALSE, fig.align = 'default', warning = FALSE}
 # for later
 trigram_counts2 <- tri_sep %>%
   count(word1, word2, word3, sort = TRUE)
@@ -361,11 +363,12 @@ t3_tf_idf1 %>%
   labs(x = NULL, y = "TF-IDF values") +
   theme(legend.position = "none") +
   facet_wrap(~ author, ncol = 3, scales = "free") +
-  coord_flip()
+  coord_flip()+ 
+  scale_fill_brewer(palette = 'Accent')
 ```
 
 
-## 4.Sentence generation
+## 4.Sentence Generation
 
 ```{r}
 ##trigram of authors
@@ -428,33 +431,28 @@ generate_sentence <- function(word1, word2,authordata, sentencelength =5, debug 
 
 ```
 
-# Part 3 Data Prediction
+## 5.Feature Engineering{.tabset}
 
-## 1.Logistics Regression
+We'll do some simple numerical summaries of the data to provide some nice visualizations.Here we add some Features to both the `spooky` datasets. The fatures are
 
+* Number of commas, semicolons, colons, questions
 
-### Feature Engineering   
+* Number of blanks,others        
 
-Here we add some Features to both the `train` and `test` datasets. The fatures are
+* Number of words beginning with Capitals, words with Capitals    
 
-* Number of commas         
+* Number of words,stopwords,negation words 
 
-* Number of semicolons         
+* Sentence length(characters); Word length(characters)
 
-* Number of colons        
+**Negation Words**:   
+Different from negative words in sentiment analysis,including:   
+**Negative words**:   no,not,none,no one,nobody,nothing,neither,nowhere,never  
+**Negative Adverbs**: hardly,scarcely,barely  
+**Negative verbs**:   doesn’t,isn’t,wasn’t,shouldn’t,wouldn’t,couldn’t,won’t,can’t,don’t  
+**Others**:           little,few,nor,neither...nor,without,unless,but for,but that,in the absence of,regardless of,instead of,exclusive of,short of,rather than,anything but,any more than,would no more...than
 
-* Number of blanks       
-
-* Number of others        
-
-* Number of words beginning with Capitals      
-
-* Number of words with Capitals                 
-
-
-All these features have been borrowed from Kaggler *jayjay* 's kernel found [here](https://www.kaggle.com/jayjay75/text2vec-glmnet). Great work jayjay!       
-
-
+Some these features have been borrowed from Kaggler *jayjay* 's kernel found [here](https://www.kaggle.com/jayjay75/text2vec-glmnet). Great work jayjay!       
 
 ```{r,message=FALSE,warning=FALSE}
 
@@ -469,57 +467,22 @@ createFE = function(ds)
   mutate(Ncapitalfirst = str_count(ds$text, " [A-Z][a-z]")) %>%
   mutate(Ncapital = str_count(ds$text, "[A-Z]")) %>%
   mutate(Nquestion = str_count(ds$text,"\\?")) 
-  ## none %>% mutate(Nexclamation = str_count(ds$text,"\\!"))
-  
+
   return(ds)
 }
-
 spooky_feature = createFE(spooky)
 
 ```
 
+### Authors and Punctuations
 
-
-#### Feature Visualization{.tabset}
-
-We'll do some simple numerical summaries of the data to provide some nice visualizations.
-
-##### Sentence Length(Characteristics)
-```{r, message = FALSE}
-spooky$sen_length <- str_length(spooky$text)
-head(spooky$sen_length)
-
-p2 <- ggplot(spooky) +
-      geom_density_ridges(aes(sen_length, author, fill = author)) +
-      scale_x_log10() +
-      theme(legend.position = "none") +
-      labs(x = "Sentence length [# characters]")
-
-
-```
-
-##### Word Length
-
-```{r}
-spooky_wrd$word_length <- str_length(spooky_wrd$word)
-#head(spooky_wrd$word_length)
-
-p3 <- ggplot(spooky_wrd) +
-      geom_density(aes(word_length, fill = author), bw = 0.05, alpha = 0.3) +
-      scale_x_log10() +
-      theme(legend.position = "none") +
-      labs(x = "Word length [# characters]")
-```
-
-##### Authors and Commas
-
-The bar plot shows the authors with the Total Number of Commas used by them.          
+The bar plot shows the authors with the Total Number of Commas,SemiColons,Colons,Questions used by them.          
 
 ```{r,message=FALSE,warning=FALSE}
 fillColor = "#FFA07A"
 fillColor2 = "#F1C40F"
 
-spooky_feature %>%
+p1<-spooky_feature %>%
   group_by(author) %>%
   summarise(SumCommas = sum(Ncommas,na.rm = TRUE)) %>%
   ungroup() %>%
@@ -532,22 +495,12 @@ spooky_feature %>%
             fontface = 'bold') +
   labs(x = 'author', 
        y = 'Commas', 
-       title = 'author and Total Number of Commas') +
+       title = 'Total Number of Commas') +
   coord_flip() + 
   theme_bw()
 
 
-## Be careful because EAP appeared more ofen than others(there are more EAP sentenes)
-
-```
-
-##### Authors and Semicolons
-
-The bar plot shows the authors with the Total Number of SemiColons used by them.          
-
-```{r,message=FALSE,warning=FALSE}
-
-spooky_feature %>%
+p2<-spooky_feature %>%
   group_by(author) %>%
   summarise(SumSemiColons = sum(Nsemicolumns,na.rm = TRUE)) %>%
   ungroup() %>%
@@ -560,43 +513,55 @@ spooky_feature %>%
             fontface = 'bold') +
   labs(x = 'author', 
        y = 'SemiColons', 
-       title = 'author and Total Number of SemiColons') +
+       title = 'Total Number of SemiColons') +
   coord_flip() + 
   theme_bw()
 
-```
-
-##### Authors and Colons
-
-The bar plot shows the authors with the Total Number of Colons used by them.          
-
-```{r,message=FALSE,warning=FALSE}
-
-spooky_feature %>%
+p3<-spooky_feature %>%
   group_by(author) %>%
   summarise(SumColons = sum(Ncolons,na.rm = TRUE)) %>%
   ungroup() %>%
   mutate(author = reorder(author,SumColons)) %>%
   
   ggplot(aes(x = author,y = SumColons)) +
-  geom_bar(stat='identity',colour="white", fill = fillColor) +
+  geom_bar(stat='identity',colour="white", fill = fillColor2) +
   geom_text(aes(x = author, y = 1, label = paste0("(",SumColons,")",sep="")),
             hjust=0, vjust=.5, size = 4, colour = 'black',
             fontface = 'bold') +
   labs(x = 'author', 
        y = 'Colons', 
-       title = 'author and Total Number of Colons') +
+       title = 'Total Number of Colons') +
   coord_flip() + 
   theme_bw()
 
+p4<-spooky_feature %>%
+  group_by(author) %>%
+  summarise(SumQuestions = sum(Nquestion,na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(author = reorder(author,SumQuestions)) %>%
+  
+  ggplot(aes(x = author,y = SumQuestions)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor) +
+  geom_text(aes(x = author, y = 1, label = paste0("(",SumQuestions,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'author', 
+       y = 'Questions', 
+       title = 'Total Number of Questions') +
+  coord_flip() + 
+  theme_bw()
+
+layout <- matrix(c(1, 2, 3, 4), 2, 2, byrow = TRUE)
+multiplot(p1, p2, p3,p4, layout = layout)
+
+## Be careful because EAP appeared more ofen than others(there are more EAP sentenes)
+
 ```
 
-##### Authors and Capital
-
-The bar plot shows the authors with the Total Number of Capital letters used by them.          
+### Sentence Ingredient
 
 ```{r,message=FALSE,warning=FALSE}
-
+# Number of Capital
 spooky_feature %>%
   group_by(author) %>%
   summarise(SumCapital = sum(Ncapital,na.rm = TRUE)) %>%
@@ -614,12 +579,97 @@ spooky_feature %>%
   coord_flip() + 
   theme_bw()
 
+#Number of words in a sentence
+spooky_feature$Nwords <- sapply(gregexpr("\\W+", spooky_feature$text), length) + 1
+
+ggplot(spooky_feature) + 
+  geom_boxplot(aes(x=author, y=Nwords,fill=author))
+
+ggplot(spooky_feature) +
+      geom_density_ridges(aes(Nwords, author, fill = author)) +
+      scale_x_log10() +
+      theme(legend.position = "none") +
+      labs(x = "Number of Words")
+
+#Number of stopwords in a sentence
+nostopword<-as.data.frame(table(spooky_wrdnew$id))
+names(nostopword)<-c("id","num_of_nostop_wrd")
+spooky_feature<-merge(spooky_feature,nostopword,by="id",all=T)
+spooky_feature$num_of_nostop_wrd[is.na(spooky_feature$num_of_nostop_wrd)]<-0
+spooky_feature$Nstop<-spooky_feature$Nwords - spooky_feature$num_of_nostop_wrd
+
+ggplot(spooky_feature) + 
+  geom_violin(aes(x=author, y=Nstop,fill=author))
+
+ggplot(spooky_feature) +
+      geom_density_ridges(aes(Nstop, author, fill = author)) +
+      scale_x_log10() +
+      theme(legend.position = "none") +
+      labs(x = "Number of StopWords")
+
+
+#Number of negation words in a sentence
+negation<-c("no","not","none","nobody","nothing","neither","nowhere","never","hardly","scarcely","barely","doesn't","isn't","wasn't","shouldn't","wouldn't","didn't","won't","can't","little","few","nor","neither","without","unless","wa'n't","dun't","dxn't","aren't","hasn't","couldn't","hadn't","don't","mustn't","ain't","haven't","wudn't","weren't")
+spooky_wrd$negation <- spooky_wrd$word %in% negation
+negationwrd<-as.data.frame(table(spooky_wrd$id[spooky_wrd$negation==T] ))
+names(negationwrd)<-c("id","num_of_negation_wrd")
+spooky_feature<-merge(spooky_feature,negationwrd,by="id",all=T)
+spooky_feature$num_of_negation_wrd[is.na(spooky_feature$num_of_negation_wrd)]<-0
+
+ggplot(spooky_feature) + 
+  geom_boxplot(aes(x=author, y=num_of_negation_wrd,fill=author))
+
+ggplot(spooky_feature) +
+      geom_density_ridges(aes(num_of_negation_wrd, author, fill = author)) +
+      theme(legend.position = "none") +
+      labs(x = "Number of Negation Words")
+
 ```
 
-```{r}
-#spooky_wrdnew <- anti_join(spooky_wrd, stop_words, by = "word")
-#bi_filt <- bi_sep %>%
- # filter(!word1 %in% stop_words$word) %>%
-  #filter(!word2 %in% stop_words$word)
+### Sentence Structure
+
+```{r, message = FALSE}
+#Number of Recordings for Author
+p5 <- ggplot(spooky) +
+  geom_bar(aes(author, fill = author)) + 
+  theme(legend.position = "none")
+
+#Sentence Length(Characters)
+spooky$sen_length <- str_length(spooky$text) 
+#head(spooky$sen_length)
+p6 <- ggplot(spooky) +
+      geom_density_ridges(aes(sen_length, author, fill = author)) +
+      scale_x_log10() +
+      theme(legend.position = "none") +
+      labs(x = "Sentence length [# characters]")
+
+#Word Length(Characters)
+spooky_wrdnew$word_length <- str_length(spooky_wrdnew$word)
+#head(spooky_wrd$word_length)
+p7 <- ggplot(spooky_wrdnew) +
+      geom_density(aes(word_length, fill = author), bw = 0.05, alpha = 0.3) +
+      scale_x_log10() +
+      theme(legend.position = "none") +
+      labs(x = "Word length [# characters]")
+
+layout <- matrix(c(1, 2, 1, 3), 2, 2, byrow = TRUE)
+multiplot(p5, p6, p7, layout = layout)
+
 ```
+
+# Part 3 Data Prediction
+
+## 1.Logistics Regression
+
+```{r}
+#spooky_feature$sen_length<-spooky$sen_length
+
+
+
+```
+
+
+## 2.LDA Topic Modeling
+
+
 
