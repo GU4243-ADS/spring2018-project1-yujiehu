@@ -3,8 +3,8 @@ title: "Some Simple SPOOKY Data Analysis"
 author: "Yujie Hu"
 date: "January 31, 2018"
 output:
-  html_document: default
-  pdf_document: default
+  md_document:
+    variant: markdown_github
 ---
 
 # Introduction
@@ -661,72 +661,7 @@ generate_sentence <- function(word1, word2,authordata, sentencelength =5, debug 
 # Part 3 Data Prediction
 
 ## 1.Logistics Regression
-```{r}
-#correlation
-spooky_feature$sen_length<-spooky$sen_length
-regressiondata<-spooky_feature[,c(-1,-2,-4,-8,-9,-10,-14)]
-#install.packages("corrplot")
-library(corrplot)
-m<-cor(regressiondata[,2:10])
-corrplot(m, type = "upper", order = "hclust", tl.col = "black", tl.srt = 45,method = "number")
-#we found number of words has a high correlation with number of stopwords,so we deleted the number of stop words from the variables
-regressiondata<-regressiondata[,-8]
-m1<-cor(regressiondata[,2:9])
-corrplot.mixed(m1, lower.col = "black", number.cex = .7)
 
-#chose variables and separate dataset
-set.seed(4243)
-sample<-sample.int(n=nrow(regressiondata),size=floor(0.75*nrow(regressiondata)),replace=F)
-train<-regressiondata[sample, ]
-test<-regressiondata[-sample, ]
-glm<-glm(author ~.,family="binomial",data=train)
-summary(glm)
-
-#stepwise
-stepglm<-step(glm,direction = "both")  
-summary(stepglm)  
-#deleted number of capital words and sentence length
-
-real <- test$author
-#predict函数可以获得模型的预测值。这里预测所需的模型对象为pre，预测对象newdata为测试集,预测所需类型type选择response,对响应变量的区间进行调整  
-predict. <- predict.glm(glm,type='response',newdata=test)  
-#按照预测值为1的概率，>0.5的返回1，其余返回0  
-predict =ifelse(predict.>0.5,1,0)  
-
-##ROC 模型精确度检验
-library(pROC)  
-modelroc <- roc(real,predict.)  
-plot(modelroc, print.auc=TRUE, auc.polygon=TRUE,legacy.axes=TRUE, grid=c(0.1, 0.2),  
-     grid.col=c("green", "red"), max.auc.polygon=TRUE,  
-     auc.polygon.col="skyblue", print.thres=TRUE)        #画出ROC曲线，标出坐标，并标出AUC的值  
-
-##检验预测精度
-res <- data.frame(real,predict )  
-table(real,predict =ifelse(predict>0.5,'lead','notlead'))  
-
-
-glm2<-glm(formula = Lead.Complete ~ BYO + Order.Now + Special.Offers + 
-            Gallery + Specifications + Lease + Estimate.Pay, family = "binomial", 
-          data = train) 
-summary(glm2)
-coef(glm2)
-real<- test$Lead.Complete
-#predict函数可以获得模型的预测值。这里预测所需的模型对象为pre，预测对象newdata为测试集,预测所需类型type选择response,对响应变量的区间进行调整  
-predict2. <- predict.glm(glm2,type='response',newdata=test)  
-#按照预测值为1的概率，>0.5的返回1，其余返回0  
-predict2 =ifelse(predict2.>mean(predict2.),1,0)  
-
-
-##检验预测精度
-res2 <- data.frame(real,predict2 )  
-table(real,predict2 =ifelse(predict2>mean(predict2.),'lead','notlead'))  
-
-error = predict2-real
-accuracy = (nrow(test)-sum(abs(error)))/nrow(test) #精确度--判断正确的数量占总数的比例  
-accuracy
-
-#将australian数据分成随机十等分  
-```
 
 
 
