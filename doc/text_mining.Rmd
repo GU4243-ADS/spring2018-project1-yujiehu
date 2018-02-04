@@ -3,8 +3,8 @@ title: "Some Simple SPOOKY Data Analysis"
 author: "Yujie Hu"
 date: "January 31, 2018"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 # Introduction
@@ -13,21 +13,52 @@ This files contains text mining analysis of the SPOOKY data.  You should be able
 
 #### <u>Content Table</u>
 
-**Part 1 Data Preparation**  
+**Part 1 Data Preparation** 
+
 1.Setup the Libraries  
+
 2.Read Data  
+
 3.Data Structure Overview   
+
 4.Data Cleaning  
 
 **Part 2 Data Exploraion**  
+
 1.Unigram  
+
+* Word Frequency & Word Cloud
+  
+* TF-IDF
+
 2.Bigram  
+
+* TF-IDF
+
+* First Two Words(Will be used for sentence generation)
+
 3.Trigram  
+
+* Without Stopwords
+
+* With Stopwords
+
 4.Feature Engineering  
+
+* Sentence Ingredients
+
+* Sentence Seasoning(Punctuations)
+
 5.Sentence Generation    
 
 **Part 3 Data Prediction**  
-1.Logistics Regression    
+
+1.Logistics Regression  
+
+* Multinomial Logistics Regression
+
+* Binary Logistics Regression
+
 2.LDA Topic Modeling
 
 # Part 1 Data Preparation{.tabset}
@@ -92,16 +123,12 @@ spooky_wrdnew <- anti_join(spooky_wrd, stop_words, by = "word")
 
 # Part 2 Data Exploration
 ## 1.Unigram{.tabset}
-### Word Frequency & Word Cloud 
-Now we study some of the most common words in the entire data set.  With the below code we plot the fifty most common words in the entire datset. We see that "time", "life", and "night" all appear frequently. 
+### 1.1 Word Frequency & Word Cloud 
+Now we study some of the most common words in the entire data set.  With the Tutourial in class, we see that "time", "life", and "night" all appear frequently. 
+
+Then, I also plotted wordcloud for each author to compare their differences in word using. 
 
 ```{r,message=FALSE,warning=FALSE}
-#Wordcloud for the entire dataset
-layout(matrix(c(1,1,1,2,3,4,5,5,5),3,3,byrow = T),heights = c(3,3,2))
-par(mar = c(0,0,0,0))
-words <- count(group_by(spooky_wrdnew, word))$word
-freqs <- count(group_by(spooky_wrdnew, word))$n
-wordcloud(words, freqs, max.words = 50, color = c("purple4", "red4", "black"))
 #Wordcloud for each wuthor
 #Function to generate dataset for each author
 get_common_words_by_author <- function(x, author, remove.stopwords = FALSE){
@@ -122,34 +149,27 @@ words_MWS <- get_common_words_by_author(x = spooky_wrd,
                            author = "MWS",
                            remove.stopwords = TRUE)
 pal <- brewer.pal(6,"Dark2")
-pal1 <- pal[-(1)]
-pal2 <- brewer.pal(9,"BuGn")
-pal3 <- pal2[-(1:4)]
+layout(matrix(c(1,2,3),1,3,byrow = T))
+par(mar = c(0,0,0,0))
 #EAP
 wordcloud(words_EAP$word,words_EAP$n,max.words = 50,colors =pal)
 #HPL
 wordcloud(words_HPL$word,words_HPL$n,max.words = 50,colors =pal)
 #MWS
 wordcloud(words_MWS$word,words_MWS$n,max.words = 50,colors =pal)
-#Title
-plot.new()
-text(x=0, y=1, c("                                                             EAP","                                                                                                                                                                                                                               HPL ","                                                                                                                                                                                                                                                                                                                                                                                 MWS"))
 ```
 
-I also plotted wordcloud for each author to compare their difference in word using. Compared to the overall word frequency,   
+Compared to the overall word frequency,     
 * **EAP used words "length","head","left","matter"** (EAP focused more on part of human? Has more word description about human's organ? like "haed","eye","feet","body","hand")  
 * **HPL used words "house","heard","strange","street","told","door"** (seems like HPL has more scenary description and created a backgroud place for the horrible story)  
 * **MWS used words "love","heart","raymond","death","father","mind"**  (MWS used more inner feeling and more abstract word like "spirit","hope"...)  
 more often. 
 
-### TF-IDF
-
-Too many arcane words in this section..... I have a hard time searching its meaning as an international student,Still Couldn't Understand what they want to convey....
+### 1.2 TF-IDF
 
 TF stands for term frequency or how often a word appears in a text and it is what is studied above in the word cloud. IDF stands for inverse document frequncy, and it is a way to pay more attention to words that are rare within the entire set of text data that is more sophisticated than simply removing stop words.  Multiplying these two values together calculates a term's tf-idf, which is the frequency of a term adjusted for how rarely it is used.  We'll use tf-idf as a heuristic index to indicate how frequently a certain author uses a word relative to the frequency that ll the authors use the word.  Therefore we will find words that are characteristic for a specific author, a good thing to have if we are interested in solving the author identification problem.
 
 ```{r}
-
 frequency <- count(spooky_wrdnew, author, word)
 tf_idf    <- bind_tf_idf(frequency, word, author, n)
 
@@ -177,8 +197,10 @@ ggplot(tf_idf) +
   labs(y = "TF-IDF values")
 ```
 
+Too many arcane words in this section..... I have a hard time searching their meanings, Still Couldn't Understand what they want to convey without context....
+
 ## 2.Bigrams{.tabset}
-### TF-IDF
+### 2.1 TF-IDF
 
 Let's start with those bigrams. We can extract all of those pairs in a very similar way as the individual words using our magical *tidytext* scissors. Here are a few random examples that will change every time we run this part:
 
@@ -241,9 +263,13 @@ We also find:
 
 - So has Mary Shelly, who seems to really like "Lord Raymond". Well, everybody loves Raymond, don't they? We also find a few turns of phrase that are typical for her, such as "fellow creatures", "hours passed", or "ill fated".  *Let's hope that the latter is not an omen for our own expedition into the heart of the darkness ...*
 
-### First Two Words(Will be used for sentence generation)
+### 2.2 First Two Words(Will be used for sentence generation)
 
-```{r}
+Let's find how these authors start their sentence with.Does anyone of them have some special writing style to surperise you at the first sight?
+
+*I will use these first words to to generate sentence for each author in the Part 2 (5).Hope It could seem like their own style and become another "spooky novel" *
+
+```{r,message=FALSE,warning=FALSE}
 spooky$first_two<-word(spooky$text, 1,2, sep=" ")
 spooky_first_two<-spooky%>%
   count(author,first_two)%>%
@@ -251,9 +277,6 @@ spooky_first_two<-spooky%>%
 
 spooky_first_two1 <- ungroup(top_n(group_by(spooky_first_two, author), 20, n))
 
-#layout(matrix(c(1,2),2,1,byrow = T),heights = c(2,3))
-#par(mar = c(0,0,0,0))
-#par(mfrow=c(2,1))
 p1<-spooky_first_two1 %>%
   ggplot(aes(reorder(first_two,n), n, fill = author), position = position_stack(reverse = TRUE)) +
   geom_col() +
@@ -270,15 +293,21 @@ p2<-spooky_first_two1 %>%
 
 layout <- matrix(c(1, 2), 2, 1, byrow = TRUE)
 multiplot(p1, p2, layout = layout)
-
-
-
 ```
 
+"It was" is the most popular way to start the sentence for all of these authors. Then come "In the","I was","I had","It is","He was","There was". Seems like my writing style... Simple and nothing special.
+But when we have a closer look for each author,there comes difference!
 
+* EAP and HPL have very similar Starting Words, EAP used more "In the" and "It is" than HPL. Souds like EAP has more to explain in the sentence and stored lots of information.
+
+* EAP seems like the most normal author when starting the sentence, EAP almost has no "own" starting words whie HPL has a perference for "As the","It had","There were","Then he","The old","I did"
+
+* MWS seems has her own style to start the sentence. MWS used a small percentage common words for starting.She showed a strong love to start with "I was","I shall","I had","We were","I cannot","But I"... She usually start with Personal Pronouns especially "I". Maybe MWS make more efforts to make  readers has similar feeling with her or help readers get addicted to her stories?
+
+*According to the frequency, I would select "It was" for EAP and HPL to generate "their" sentences. "I was" will be prepared for MWS *
 
 ## 3.Trigrams{.tabset}
-### Without Stopwords
+### 3.1 Without Stopwords
 
 *Three is a magical number. A terrible number. There were 3 witches to foretell Macbeth his blood-drenched destiny. The devil hound Cerberus has 3 heads. The number of the beast is 3 times the number 3+3. All these warning signs try to reach our concience as we prepare to repeat the same analysis we had done for bigrams on their cousins thrice removed: trigrams.*
 
@@ -339,10 +368,11 @@ We find:
 - Most importantly, though, we find out that Raymond was from [Galifrey](https://en.wikipedia.org/wiki/Time_Lord). That might explain why he's so popular and why he manages to exert such a strong influence on Shelley's writing.
 
 
-### With Stopwords
+### 3.2 With Stopwords
+
+This time let's put stopwords into consideration and see whether it could add more interests in their expression. 
 
 ```{r split=FALSE, fig.align = 'default', warning = FALSE}
-# for later
 trigram_counts2 <- tri_sep %>%
   count(word1, word2, word3, sort = TRUE)
 
@@ -369,10 +399,20 @@ t3_tf_idf1 %>%
   scale_fill_brewer(palette = 'Accent')
 ```
 
+We find:
+
+* EAP and HPL are still similar in their writing style. Their trigrams are almost all conjunctions which don't have much information
+
+* EAP used "three or four" frequently, Checking back to the original sentences, what follows the quantitive amout is usually time("weeks","hours","days"...).
+Seems like EAP tends to describe things vaguely and create some unclear concepts for reader to guess?
+
+* HPL are fond of house! Could he afford his own house back to his time? The high house price made him scary??
+
+* MWS gives more information on this part. My father?? My fellow creatures?? I entreat you?? She really loves using person prons in the sentence. Her trigram doesn't seems could be compiled to a spooky novel... It made me feel warm...
 
 ## 4.Feature Engineering{.tabset}
 
-We'll do some simple numerical summaries of the data to provide some nice visualizations.Here we add some Features to both the `spooky` datasets. The fatures are
+We'll do some simple numerical summaries of the data to provide some nice visualizations.Here we add some Features to the `spooky` datasets. The fatures are
 
 * Number of commas, semicolons, colons, questions
 
@@ -384,12 +424,7 @@ We'll do some simple numerical summaries of the data to provide some nice visual
 
 * Sentence length(characters); Word length(characters)
 
-**Negation Words**:   
-Different from negative words in sentiment analysis,including:   
-**Negative words**:   no,not,none,no one,nobody,nothing,neither,nowhere,never  
-**Negative Adverbs**: hardly,scarcely,barely  
-**Negative verbs**:   doesn’t,isn’t,wasn’t,shouldn’t,wouldn’t,couldn’t,won’t,can’t,don’t  
-**Others**:           little,few,nor,neither...nor,without,unless,but for,but that,in the absence of,regardless of,instead of,exclusive of,short of,rather than,anything but,any more than,would no more...than
+We may find some traces how these author *cooking* their horrible books!
 
 Some these features have been borrowed from Kaggler *jayjay* 's kernel found [here](https://www.kaggle.com/jayjay75/text2vec-glmnet). Great work jayjay!       
 
@@ -413,10 +448,12 @@ spooky_feature = createFE(spooky)
 
 ```
 
-### Sentence Ingredients
+### 4.1 Sentence Ingredients
 
-```{r,message=FALSE,warning=FALSE}
-# Number of Capital
+Here comes their "Sentence Ingredients"!  This part tell us How Much Special Ingredients they Add in Their Stories.
+
+First is the number of Capital they used
+```{r}
 spooky_feature %>%
   group_by(author) %>%
   summarise(SumCapital = sum(Ncapital,na.rm = TRUE)) %>%
@@ -433,37 +470,52 @@ spooky_feature %>%
        title = 'Total Number of  Capital Letters') +
   coord_flip() + 
   theme_bw()
+```
 
-#Number of words in a sentence
+* Seems like EAP used more Capital Letters,But there are also more sentence included in the dataset writen by EAP.(EAP,HPL,MWS :7900,5635,6044) After Calculating the Captical Letters Per Sentence, HPL won! EAP and MWS have an average of 2.2 per sentence while HPL has 2.4.
+
+Next comes the number of words in a sentence. 
+
+```{r}
 spooky_feature$Nwords <- sapply(gregexpr("\\W+", spooky_feature$text), length) + 1
-
 ggplot(spooky_feature) + 
   geom_boxplot(aes(x=author, y=Nwords,fill=author))
+```
 
-ggplot(spooky_feature) +
-      geom_density_ridges(aes(Nwords, author, fill = author)) +
-      scale_x_log10() +
-      theme(legend.position = "none") +
-      labs(x = "Number of Words")
+* HPL has a relatively long sentence than others while MWS occassionaly write some extrmely long sentence.
 
-#Number of stopwords in a sentence
+* HPL is very stable and have a steady performance when add words into his stories while MWS seems very flexible and sometimes may has A Burst of Inspiration??
+
+Then comes number of stopwords in a sentence
+
+```{r,message=FALSE,warning=FALSE}
 nostopword<-as.data.frame(table(spooky_wrdnew$id))
 names(nostopword)<-c("id","num_of_nostop_wrd")
 spooky_feature<-merge(spooky_feature,nostopword,by="id",all=T)
 spooky_feature$num_of_nostop_wrd[is.na(spooky_feature$num_of_nostop_wrd)]<-0
 spooky_feature$Nstop<-spooky_feature$Nwords - spooky_feature$num_of_nostop_wrd
 
-ggplot(spooky_feature) + 
-  geom_violin(aes(x=author, y=Nstop,fill=author))
-
 ggplot(spooky_feature) +
       geom_density_ridges(aes(Nstop, author, fill = author)) +
       scale_x_log10() +
       theme(legend.position = "none") +
       labs(x = "Number of StopWords")
+```
 
+* MWS used less stopwords than other two, which could also be found from her trigram.
 
-#Number of negation words in a sentence
+At last,it is the number of negation words in a sentence
+
+**Negation Words**:   
+Different from negative words in sentiment analysis,including:   
+**Negative words**:   no,not,none,no one,nobody,nothing,neither,nowhere,never  
+**Negative Adverbs**: hardly,scarcely,barely  
+**Negative verbs**:   doesn’t,isn’t,wasn’t,shouldn’t,wouldn’t,couldn’t,won’t,can’t,don’t  
+**Others**:           little,few,nor,neither...nor,without,unless,but for,but that,in the absence of,regardless of,instead of,exclusive of,short of,rather than,anything but,any more than,would no more...than
+
+I didn't find a existing word list for this....So I just generated some by myself.Correct me if I am wrong.
+
+```{r,message=FALSE,warning=FALSE}
 negation<-c("no","not","none","nobody","nothing","neither","nowhere","never","hardly","scarcely","barely","doesn't","isn't","wasn't","shouldn't","wouldn't","didn't","won't","can't","little","few","nor","neither","without","unless","wa'n't","dun't","dxn't","aren't","hasn't","couldn't","hadn't","don't","mustn't","ain't","haven't","wudn't","weren't")
 spooky_wrd$negation <- spooky_wrd$word %in% negation
 negationwrd<-as.data.frame(table(spooky_wrd$id[spooky_wrd$negation==T] ))
@@ -474,16 +526,19 @@ spooky_feature$num_of_negation_wrd[is.na(spooky_feature$num_of_negation_wrd)]<-0
 ggplot(spooky_feature) + 
   geom_boxplot(aes(x=author, y=num_of_negation_wrd,fill=author))
 
-ggplot(spooky_feature) +
-      geom_density_ridges(aes(num_of_negation_wrd, author, fill = author)) +
-      theme(legend.position = "none") +
-      labs(x = "Number of Negation Words")
-
 ```
 
-### Sentence Seasoning(Punctuations)
+* They almost have the same performance and only EAP may use a little more negation words.
 
-The bar plot shows the authors with the Total Number of Commas,SemiColons,Colons,Questions used by them.          
+Overall, we could find HPL has a very good writing habit, moderate length, moderate Words, Good example for us. He may never added too much butter to his bread...
+
+### 4.2 Sentence Seasoning(Punctuations)
+
+After checking their ingradients, what did they put for the "Flavour"?
+
+The bar plot shows the authors with the Total Number of Commas,SemiColons,Colons,Questions used by them.       
+
+Still, be careful because EAP appeared more ofen than others.
 
 ```{r,message=FALSE,warning=FALSE}
 p1<-spooky_feature %>%
@@ -502,7 +557,6 @@ p1<-spooky_feature %>%
        title = 'Total Number of Commas') +
   coord_flip() + 
   theme_bw()
-
 
 p2<-spooky_feature %>%
   group_by(author) %>%
@@ -557,43 +611,11 @@ p4<-spooky_feature %>%
 
 layout <- matrix(c(1, 2, 3, 4), 2, 2, byrow = TRUE)
 multiplot(p1, p2, p3,p4, layout = layout)
-
-## Be careful because EAP appeared more ofen than others(there are more EAP sentenes)
-
 ```
 
+* HPL cherishes his Commas, Colons and Questions and only used little seasoning...
 
-
-### Sentence Structure
-
-```{r, message = FALSE}
-#Number of Recordings for Author
-p5 <- ggplot(spooky) +
-  geom_bar(aes(author, fill = author)) + 
-  theme(legend.position = "none")
-
-#Sentence Length(Characters)
-spooky$sen_length <- str_length(spooky$text) 
-#head(spooky$sen_length)
-p6 <- ggplot(spooky) +
-      geom_density_ridges(aes(sen_length, author, fill = author)) +
-      scale_x_log10() +
-      theme(legend.position = "none") +
-      labs(x = "Sentence length [# characters]")
-
-#Word Length(Characters)
-spooky_wrdnew$word_length <- str_length(spooky_wrdnew$word)
-#head(spooky_wrd$word_length)
-p7 <- ggplot(spooky_wrdnew) +
-      geom_density(aes(word_length, fill = author), bw = 0.05, alpha = 0.3) +
-      scale_x_log10() +
-      theme(legend.position = "none") +
-      labs(x = "Word length [# characters]")
-
-layout <- matrix(c(1, 2, 1, 3), 2, 2, byrow = TRUE)
-multiplot(p5, p6, p7, layout = layout)
-
-```
+* MWS is almost wasting Semicolons and Colons compared to others...
 
 ## 5.Sentence Generation
 
@@ -661,74 +683,150 @@ generate_sentence <- function(word1, word2,authordata, sentencelength =5, debug 
 # Part 3 Data Prediction
 
 ## 1.Logistics Regression
+
+###1.1 Multinomial Logistics Regression...
+
+I tried to use "Ncommas","Nsemicolumns","Ncolons","Ncapital","Nquestion","Nwords","num_of_negation_wrd","sen_length" to predict the author...but stuck in this part... I listed some material I used for the code but I still didn't understand the principle of Multinominal Logistics Regression enough...
+
+Please Correct me
+
+*[How to: Multinomial regression models in R](https://www.r-bloggers.com/how-to-multinomial-regression-models-in-r/)*
+
+*[R examples](https://stats.idre.ucla.edu/r/dae/multinomial-logistic-regression/)*
+
+*[How to: Multinomial regression models in R](https://www.r-bloggers.com/how-to-multinomial-regression-models-in-r/)*
+
+First I added sentence length(characters) and word length(characters) to dataset.
+
+```{r, message = FALSE}
+spooky$sen_length <- str_length(spooky$text) 
+spooky_wrdnew$word_length <- str_length(spooky_wrdnew$word)
+```
+
+Used correlation plots to delete variables.
+
+*You may need to download the package **corrplot** to run the code.*
+
 ```{r}
-#correlation
 spooky_feature$sen_length<-spooky$sen_length
 regressiondata<-spooky_feature[,c(-1,-2,-4,-8,-9,-10,-14)]
 #install.packages("corrplot")
 library(corrplot)
 m<-cor(regressiondata[,2:10])
 corrplot(m, type = "upper", order = "hclust", tl.col = "black", tl.srt = 45,method = "number")
-#we found number of words has a high correlation with number of stopwords,so we deleted the number of stop words from the variables
+```
+
+I found number of words has a high correlation with number of stopwords,so I deleted the number of stop words from the variables. Correlation again.
+
+```{r}
 regressiondata<-regressiondata[,-8]
 m1<-cor(regressiondata[,2:9])
 corrplot.mixed(m1, lower.col = "black", number.cex = .7)
+```
 
-#chose variables and separate dataset
+Separate dataset into train and test.
+
+```{r}
 set.seed(4243)
 sample<-sample.int(n=nrow(regressiondata),size=floor(0.75*nrow(regressiondata)),replace=F)
 train<-regressiondata[sample, ]
 test<-regressiondata[-sample, ]
-glm<-glm(author ~.,family="binomial",data=train)
-summary(glm)
-
-#stepwise
-stepglm<-step(glm,direction = "both")  
-summary(stepglm)  
-#deleted number of capital words and sentence length
-
-real <- test$author
-#predict函数可以获得模型的预测值。这里预测所需的模型对象为pre，预测对象newdata为测试集,预测所需类型type选择response,对响应变量的区间进行调整  
-predict. <- predict.glm(glm,type='response',newdata=test)  
-#按照预测值为1的概率，>0.5的返回1，其余返回0  
-predict =ifelse(predict.>0.5,1,0)  
-
-##ROC 模型精确度检验
-library(pROC)  
-modelroc <- roc(real,predict.)  
-plot(modelroc, print.auc=TRUE, auc.polygon=TRUE,legacy.axes=TRUE, grid=c(0.1, 0.2),  
-     grid.col=c("green", "red"), max.auc.polygon=TRUE,  
-     auc.polygon.col="skyblue", print.thres=TRUE)        #画出ROC曲线，标出坐标，并标出AUC的值  
-
-##检验预测精度
-res <- data.frame(real,predict )  
-table(real,predict =ifelse(predict>0.5,'lead','notlead'))  
-
-
-glm2<-glm(formula = Lead.Complete ~ BYO + Order.Now + Special.Offers + 
-            Gallery + Specifications + Lease + Estimate.Pay, family = "binomial", 
-          data = train) 
-summary(glm2)
-coef(glm2)
-real<- test$Lead.Complete
-#predict函数可以获得模型的预测值。这里预测所需的模型对象为pre，预测对象newdata为测试集,预测所需类型type选择response,对响应变量的区间进行调整  
-predict2. <- predict.glm(glm2,type='response',newdata=test)  
-#按照预测值为1的概率，>0.5的返回1，其余返回0  
-predict2 =ifelse(predict2.>mean(predict2.),1,0)  
-
-
-##检验预测精度
-res2 <- data.frame(real,predict2 )  
-table(real,predict2 =ifelse(predict2>mean(predict2.),'lead','notlead'))  
-
-error = predict2-real
-accuracy = (nrow(test)-sum(abs(error)))/nrow(test) #精确度--判断正确的数量占总数的比例  
-accuracy
-
-#将australian数据分成随机十等分  
 ```
 
+Here comes my nightmare...
 
+*You may need to download the package **nnet** to run the code.*
+
+```{r}
+library(nnet)
+mult<-multinom(author~.,data=train)
+summary(mult)
+```
+
+Used stepwise to get a better model.
+
+```{r}
+stepmult<-step(mult,trace=0)  
+summary(stepmult)
+```
+
+Predict the result of test set
+
+```{r}
+# put into test dataset
+result<-predict(stepmult,test)
+head(result)
+resultprob<-predict(stepmult,test,"probs")
+head(resultprob)
+```
+
+Show the final comparision of predicted & true author
+
+```{r}
+# prediction for test
+n<-table(test$author,result)
+n
+Percantage<-c(n[1,1]/sum(n[1,]),n[2,2]/sum(n[2,]),n[3,3]/sum(n[3,]))
+Category<-levels(test$author)
+rbind(Category,Percantage)
+accuracy<-sum(diag(n))/nrow(test)
+accuracy
+```
+* seems like EAP has a better predict rate? But the table of result showed that it is because almost 80% of predicted author are EAP. HPL is hard to detect??
+
+* overall accuracy rate 44.6%. Not better than guess...
+
+* tried Binary Logistics regression next part.
+
+### 1.2 Binary Logistics Regression
+
+Logistic regression could be used on our data to make binary choices like is it MSW or not.  While it seems like one should be able to use three logistic regression models (MSW or not, EAP or not, HPL or not) to classify the text, it won't necessarily be the case that the results of the three models agree.
+
+I will show one example (EAP or Not) here and give the result of other two.
+
+Prepare the dataset
+```{r}
+EAPorNot<-regressiondata
+EAPorNot$author<-as.character(EAPorNot$author)
+EAPorNot$author[which(EAPorNot$author!="EAP")]<-"Others"
+EAPorNot$author<-as.factor(EAPorNot$author)
+
+set.seed(4243)
+sample1<-sample.int(n=nrow(EAPorNot),size=floor(0.75*nrow(EAPorNot)),replace=F)
+train1<-EAPorNot[sample1, ]
+test1<-EAPorNot[-sample1, ]
+```
+
+Conduct regression 
+
+```{r}
+glm<-glm(author ~.,family="binomial",data=train1)
+summary(glm)
+#stepwise
+stepglm<-step(glm,direction = "both",trace=0)  
+summary(stepglm)  
+#deleted number of capital words and sentence length
+```
+
+Predict results
+
+```{r}
+real <- test1$author
+predict. <- predict.glm(stepglm,type='response',newdata=test1)  
+#Return 1 when the possibility > mean predicted value  
+summary(predict.)
+predict =ifelse(predict.>mean(predict.),1,0)  
+##accuracy
+res <- data.frame(real,predict)  
+eap<-table(real,predict =ifelse(predict>mean(predict.),'EAP','Others'))  
+eap
+accuracy = sum(diag(eap))/nrow(test) 
+accuracy
+```
+
+* 40.29% accrucy for EPA. Seems inaccording with the Multinomial Regression...Do they have relationship???
+
+* I also conducted Binary for HPL and MWS, their predicted accuracy results is about 57.18% and 53.75% almost guessing...
 
 ## 2.LDA Topic Modeling
 
