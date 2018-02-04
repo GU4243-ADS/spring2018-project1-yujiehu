@@ -160,10 +160,10 @@ wordcloud(words_MWS$word,words_MWS$n,max.words = 50,colors =pal)
 ```
 
 Compared to the overall word frequency,     
-* **EAP used words "length","head","left","matter"** (EAP focused more on part of human? Has more word description about human's organ? like "haed","eye","feet","body","hand")  
-* **HPL used words "house","heard","strange","street","told","door"** (seems like HPL has more scenary description and created a backgroud place for the horrible story)  
-* **MWS used words "love","heart","raymond","death","father","mind"**  (MWS used more inner feeling and more abstract word like "spirit","hope"...)  
-more often. 
+* EAP used words "length","head","left","matter" (EAP focused more on part of human? Has more word description about human's organ? like "haed","eye","feet","body","hand")  
+* HPL used words "house","heard","strange","street","told","door" (seems like HPL has more scenary description and created a backgroud place for the horrible story)  
+
+* MWS used words "love","heart","raymond","death","father","mind" (MWS used more inner feeling and more abstract word like "spirit","hope"...)  
 
 ### 1.2 TF-IDF
 
@@ -180,10 +180,13 @@ tf_idf_30 <- top_n(tf_idf, 30, tf_idf)
 ggplot(tf_idf_30) +
   geom_col(aes(word, tf_idf, fill = author)) +
   labs(x = NULL, y = "TF-IDF values") +
-  theme(legend.position = "top", axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9))
+  theme(legend.position = "top", axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9))+ 
+  scale_fill_brewer(palette = 'Accent')
 ```
 
-Note that in the above, many of the words recognized by their tf-idf scores are names.  This makes sense -- if we see text referencing Raymond, Idris, or Perdita, we know almost for sure that MWS is the author.  But some non-names stand out.  EAP often uses "monsieur" and "jupiter" while HPL uses the words "bearded" and "attic" more frequently than the others.  We can also look at the most characteristic terms per author.
+Note that in the above, many of the words recognized by their tf-idf scores are names.  This makes sense -- if we see text referencing Raymond, Idris, or Perdita, we know almost for sure that MWS is the author.  But some non-names stand out.  EAP often uses "monsieur" and "jupiter" while HPL uses the words "bearded" and "attic" more frequently than the others.  
+
+We can also look at the most characteristic terms per author.
 
 ```{r}
 tf_idf <- ungroup(top_n(group_by(tf_idf, author), 20, tf_idf))
@@ -194,10 +197,15 @@ ggplot(tf_idf) +
   theme(legend.position = "none") +
   facet_wrap(~ author, ncol = 3, scales = "free") +
   coord_flip() +
-  labs(y = "TF-IDF values")
+  labs(y = "TF-IDF values")+ 
+  scale_fill_brewer(palette = 'Accent')
 ```
 
-Too many arcane words in this section..... I have a hard time searching their meanings, Still Couldn't Understand what they want to convey without context....
+* Naturally, we recover our top ranking words such as “Perdita” or “Arkham”. But here we also see that Mary Shelley liked the word “until” while H P Lovecraft wrote about “legends”.
+
+* Edgar Allan Poe’s work contains some interesting technical terms such as “diameter” or “velocity”. And “lollipop”, which is, admittedly, somewhat less scary than expected. Unless it is a lollipop made from … blood!
+
+Too many arcane words in this section... I have a hard time searching their meanings, Still Couldn't Understand what they want to convey without context...Maybe in next parts it will reveal more interesting facts.
 
 ## 2.Bigrams{.tabset}
 ### 2.1 TF-IDF
@@ -250,7 +258,8 @@ t2_tf_idf %>%
   labs(x = NULL, y = "TF-IDF values") +
   theme(legend.position = "none") +
   facet_wrap(~ author, ncol = 3, scales = "free") +
-  coord_flip()
+  coord_flip()+ 
+  scale_fill_brewer(palette = 'Accent')
 ```
 
 Um... I have the indistinct feeling that both Poe and Lovecraft are laughing at us. If there is only one thing in the world that should make you feel uneasy, it's probably laughter from those two.
@@ -281,7 +290,8 @@ p1<-spooky_first_two1 %>%
   ggplot(aes(reorder(first_two,n), n, fill = author), position = position_stack(reverse = TRUE)) +
   geom_col() +
   labs(x = NULL, y = "Number of Appearance") +
-  theme(legend.position = "none",axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9)) 
+  theme(legend.position = "none",axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9))+ 
+  scale_fill_brewer(palette = 'Accent') 
 
 p2<-spooky_first_two1 %>%
   ggplot(aes(reorder(first_two,n), n, fill = author), position = position_stack(reverse = TRUE)) +
@@ -289,7 +299,8 @@ p2<-spooky_first_two1 %>%
   labs(x = NULL, y = "Number of Appearance") +
   theme(legend.position = "none")+
   facet_wrap(~ author, ncol = 3, scales = "free") +
-  coord_flip()
+  coord_flip()+ 
+  scale_fill_brewer(palette = 'Accent')
 
 layout <- matrix(c(1, 2), 2, 1, byrow = TRUE)
 multiplot(p1, p2, layout = layout)
@@ -355,7 +366,8 @@ t3_tf_idf %>%
   labs(x = NULL, y = "TF-IDF values") +
   theme(legend.position = "none") +
   facet_wrap(~ author, ncol = 3, scales = "free") +
-  coord_flip()
+  coord_flip()+ 
+  scale_fill_brewer(palette = 'Accent')
 ```
 
 
@@ -479,7 +491,8 @@ Next comes the number of words in a sentence.
 ```{r}
 spooky_feature$Nwords <- sapply(gregexpr("\\W+", spooky_feature$text), length) + 1
 ggplot(spooky_feature) + 
-  geom_boxplot(aes(x=author, y=Nwords,fill=author))
+  geom_boxplot(aes(x=author, y=Nwords,fill=author))+ 
+  scale_fill_brewer(palette = 'Accent')
 ```
 
 * HPL has a relatively long sentence than others while MWS occassionaly write some extrmely long sentence.
@@ -499,7 +512,8 @@ ggplot(spooky_feature) +
       geom_density_ridges(aes(Nstop, author, fill = author)) +
       scale_x_log10() +
       theme(legend.position = "none") +
-      labs(x = "Number of StopWords")
+      labs(x = "Number of StopWords")+ 
+  scale_fill_brewer(palette = 'Accent')
 ```
 
 * MWS used less stopwords than other two, which could also be found from her trigram.
@@ -508,12 +522,12 @@ At last,it is the number of negation words in a sentence
 
 **Negation Words**:   
 Different from negative words in sentiment analysis,including:   
-**Negative words**:   no,not,none,no one,nobody,nothing,neither,nowhere,never  
-**Negative Adverbs**: hardly,scarcely,barely  
-**Negative verbs**:   doesn’t,isn’t,wasn’t,shouldn’t,wouldn’t,couldn’t,won’t,can’t,don’t  
-**Others**:           little,few,nor,neither...nor,without,unless,but for,but that,in the absence of,regardless of,instead of,exclusive of,short of,rather than,anything but,any more than,would no more...than
+*Negative words*:\   no,not,none,no one,nobody,nothing,neither,nowhere,never  
+*Negative Adverbs*:\ hardly,scarcely,barely  
+*Negative verbs*:\   doesn’t,isn’t,wasn’t,shouldn’t,wouldn’t,couldn’t,won’t,can’t,don’t  
+*Others*:\           little,few,nor,neither...nor,without,unless,but for,but that,in the absence of,regardless of,instead of,exclusive of,short of,rather than,anything but,any more than,would no more...than
 
-I didn't find a existing word list for this....So I just generated some by myself.Correct me if I am wrong.
+I didn't find a existing word list for this....So I just generated some by myself. Correct me if I am wrong.
 
 ```{r,message=FALSE,warning=FALSE}
 negation<-c("no","not","none","nobody","nothing","neither","nowhere","never","hardly","scarcely","barely","doesn't","isn't","wasn't","shouldn't","wouldn't","didn't","won't","can't","little","few","nor","neither","without","unless","wa'n't","dun't","dxn't","aren't","hasn't","couldn't","hadn't","don't","mustn't","ain't","haven't","wudn't","weren't")
@@ -524,21 +538,18 @@ spooky_feature<-merge(spooky_feature,negationwrd,by="id",all=T)
 spooky_feature$num_of_negation_wrd[is.na(spooky_feature$num_of_negation_wrd)]<-0
 
 ggplot(spooky_feature) + 
-  geom_boxplot(aes(x=author, y=num_of_negation_wrd,fill=author))
+  geom_boxplot(aes(x=author, y=num_of_negation_wrd,fill=author))+ 
+  scale_fill_brewer(palette = 'Accent')
 
 ```
 
 * They almost have the same performance and only EAP may use a little more negation words.
 
-Overall, we could find HPL has a very good writing habit, moderate length, moderate Words, Good example for us. He may never added too much butter to his bread...
+Overall, we could find HPL has a very good writing habit, moderate length, moderate words number, Good example for us. He may never added too much butter to his bread...
 
 ### 4.2 Sentence Seasoning(Punctuations)
 
-After checking their ingradients, what did they put for the "Flavour"?
-
-The bar plot shows the authors with the Total Number of Commas,SemiColons,Colons,Questions used by them.       
-
-Still, be careful because EAP appeared more ofen than others.
+After checking their ingradients, what did they put for the "Flavour"? The bar plot shows the authors with the Total Number of Commas,SemiColons,Colons,Questions used by them. Still, be careful because EAP appeared more ofen than others.
 
 ```{r,message=FALSE,warning=FALSE}
 p1<-spooky_feature %>%
@@ -619,8 +630,22 @@ multiplot(p1, p2, p3,p4, layout = layout)
 
 ## 5.Sentence Generation
 
+In the current example I’m using all the phrases I extracted from the trigrams. And then well use words that follow each other choosing “randomly” but weighted by occurrence.
+
+My endproduct takes two words and tries to find a third word. Then it takes the final two words and tries to find another word untill the sentance has a length that I specify at the start.
+
+What I actually created is a trigram dataframe, and a function that searches that frame. The function takes two words and returns all the rows where the first word matches the first column and the second word matches the second column.
+
+Furthermore I made a sentence creator, a function where you supply the first two words and the length of the sentence. That function keeps using the last words in the sentence until the correct length is achieved. With the fallback method of using bigrams when the trigrams don’t work anymore it could still fail, but not so often.
+
+According to what we got from Part 2 (2.2), I generated sentences using the most frequent starting words used by each author. "It was","It was","I was" for EAP HPL and MWS respectively.
+
+*Please input sentence length above 3*  
+*If there are imporper word inputed(such as "i" & "no" which couldn't be linked together used as approporite starting words for a sentence), it will print "Change the starting words or sentence length/Rerun the code"*
+
+
 ```{r}
-##trigram of authors
+#trigram of authors
 trigrams_EAP <- spooky %>%
         filter(author == "EAP") %>%
         unnest_tokens(trigram, text, token = "ngrams",to_lower = TRUE, n= 3) %>%
@@ -637,14 +662,18 @@ trigrams_MWS <- spooky %>%
         separate(trigram, c("word1", "word2", "word3"), sep = " ") %>%
         count(word1, word2,word3, sort = TRUE)
 
-##may be a grap here about 
-
 ##sentence generator
 return_third_word <- function( woord1, woord2,authordata){
-        woord <- authordata %>%
-                filter_(~word1 == woord1, ~word2 == woord2) %>%
-                sample_n(1, weight = n) %>%
+        temp<-authordata%>%
+          filter_(~word1 == woord1, ~word2 == woord2)
+        if (dim(temp)[1]==0){
+          print("Change the starting words or sentence length you inputed/Rerun the code")
+        }
+        else{
+        woord <- temp %>%
+                sample_n(size=1, weight = n,replace = T) %>%
                 .[["word3"]]
+        #seems useless?
         if(length(woord) == 0){
                 bleh <- filter_(authordata, ~word1 == woord2) %>%
                         sample_n(1, weight = n)
@@ -652,18 +681,22 @@ return_third_word <- function( woord1, woord2,authordata){
                 woord <- bleh
         }
         woord
+        }
 }
+#for test: return_third_word("i","s",trigrams_EAP)
 generate_sentence <- function(word1, word2,authordata, sentencelength =5, debug =FALSE){
         #input validation
-        if(sentencelength <3)stop("I need more to work with")
+        #if(sentencelength <3)stop("I need more to work with")
         sentencelength <- sentencelength -2
         # starting
         sentence <- c(word1, word2)
         woord1 <- word1
         woord2 <- word2
         for(i in seq_len(sentencelength)){
-                if(debug == TRUE)print(i)
+                #if(debug == TRUE)print(i)
                 word <- return_third_word( woord1, woord2, authordata )
+               # if(return_third_word( woord1, woord2, authordata )=="Change the word you inputed")
+                #  print("Rerun please")else
                 sentence <- c(sentence, word)
                 woord1 <- woord2
                 woord2 <- word
@@ -671,14 +704,103 @@ generate_sentence <- function(word1, word2,authordata, sentencelength =5, debug 
         output <-paste(sentence, collapse = " ")
         output
 }
-#generate_sentence("the", "man",trigrams_EAP, 15)
-#generate_sentence("the", "man",trigrams_HPL, 15)
-#generate_sentence("the", "man",trigrams_MWS, 15)
-
-## find the first two world used most frequently by author.
-## compile their psycho profile starting with their sanguan life world man value
-
+generate_sentence("it", "was",trigrams_EAP, 6)
+generate_sentence("it", "was",trigrams_HPL, 6)
+generate_sentence("i", "was",trigrams_MWS, 6)
 ```
+Examples with the most frequent starting words for each author:
+
+*EAP 
+
+[1] "it was only with difficulty shake off incumbent eternally upon my word mark that"
+
+[1] "it was her beauty in my opinion by certain superstitious impressions in view of"
+
+[1] "it was sitting alone in his eyes became unwittingly rivetted"
+
+[1] "it was clear that the doom prepared for me"
+
+[1] "it was the last eventful scene of the magnificent"
+
+*HPL
+
+[1] "it was his mountain freedom that he thought he heard about the matter for speculation"
+
+[1] "it was at a glance doubly absurd since the garret chamber were wholly beyond conjecture"
+
+[1] "it was the ultimate things i have dwelt ever in realms apart from their"
+
+[1] "it was probably merely a fresh bending and matting visible"
+
+[1] "it was not his own hands reached out to uncurl"
+
+*MWS
+
+[1] "i was gradually recovering i was shut out from crackling branches of the seas rather"
+
+[1] "i was perplexed and unable to arrange my ideas seemed to hold out longer"
+
+[1] "i was acting for the cottage they consisted of paradise"
+
+[1] "i was happy and with a reinforcement they had"
+
+[1] "i was gradually recovering i was so much desired"
+
+We could change the first two words, author number of words in the sentence. But usually the shorter the sentence, the more reasonable the meaning. 
+
+I didn't get too much insight from the "Machine Sentence" hhh. From my perspective, the only difference is there are more strange words I am unfamilar with in EAP and HPL's sentences...Seems like MWS is more user friendly?
+
+We could explore more about how those authors describe the world or life or anything else in their sentence by changing the first two words. This may reflect their attitudes and values.  
+
+How they describe the world
+```{r}
+generate_sentence("world", "was",trigrams_EAP, 6)
+generate_sentence("world", "was",trigrams_HPL, 6)
+generate_sentence("world", "was",trigrams_MWS, 6)
+```
+*EAP
+
+[1] "the world grew dark before mine"
+
+[1] "the world grew dark before mine eyes in an attitude"
+
+*HPL
+
+[1] "the world or no longer controls"
+
+[1] "the world battling against blackness against the rotting remains of"
+
+*MWS
+
+[1] "the world had grown stale to"
+
+[1] "the world is come before dawn i led a young"
+
+How they describe life.
+```{r}
+generate_sentence("life", "was",trigrams_EAP, 6)
+generate_sentence("life", "was",trigrams_HPL, 6)
+generate_sentence("life", "was",trigrams_MWS, 6)
+```
+*EAP
+
+[1] "life was in search of the calling a"
+
+[1] "life was in truth the masquerade license of"
+
+*HPL
+
+[1] "life was known to barzai the wise shrieking"
+
+[1] "life was confined to the southeast and now"
+
+*MWS
+
+[1] "life was now united to his past life"
+
+[1] "life was now awake she was miserable and"
+
+*All the generated sentences are not so positive, fulling with "dark" and "miserable".
 
 # Part 3 Data Prediction
 
@@ -688,7 +810,7 @@ generate_sentence <- function(word1, word2,authordata, sentencelength =5, debug 
 
 I tried to use "Ncommas","Nsemicolumns","Ncolons","Ncapital","Nquestion","Nwords","num_of_negation_wrd","sen_length" to predict the author...but stuck in this part... I listed some material I used for the code but I still didn't understand the principle of Multinominal Logistics Regression enough...
 
-Please Correct me
+Please correct me
 
 *[How to: Multinomial regression models in R](https://www.r-bloggers.com/how-to-multinomial-regression-models-in-r/)*
 
@@ -826,7 +948,7 @@ accuracy
 
 * 40.29% accrucy for EPA. Seems inaccording with the Multinomial Regression...Do they have relationship???
 
-* I also conducted Binary for HPL and MWS, their predicted accuracy results is about 57.18% and 53.75% almost guessing...
+* I also conducted Binary for HPL and MWS, their predicted accuracy results is about 57.18% and 53.75%. Almost guessing...
 
 ## 2.LDA Topic Modeling
 
