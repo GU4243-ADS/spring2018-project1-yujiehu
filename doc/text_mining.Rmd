@@ -59,7 +59,11 @@ This files contains text mining analysis of the SPOOKY data.  You should be able
 
 * Binary Logistics Regression
 
-2.LDA Topic Modeling
+2.Topic Modeling(LDA)
+
+* Sentiment Analysis
+
+* Topic Modeling
 
 # Part 1 Data Preparation{.tabset}
 
@@ -181,7 +185,8 @@ ggplot(tf_idf_30) +
   geom_col(aes(word, tf_idf, fill = author)) +
   labs(x = NULL, y = "TF-IDF values") +
   theme(legend.position = "top", axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9))+ 
-  scale_fill_brewer(palette = 'Accent')
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
+
 ```
 
 Note that in the above, many of the words recognized by their tf-idf scores are names.  This makes sense -- if we see text referencing Raymond, Idris, or Perdita, we know almost for sure that MWS is the author.  But some non-names stand out.  EAP often uses "monsieur" and "jupiter" while HPL uses the words "bearded" and "attic" more frequently than the others.  
@@ -198,7 +203,8 @@ ggplot(tf_idf) +
   facet_wrap(~ author, ncol = 3, scales = "free") +
   coord_flip() +
   labs(y = "TF-IDF values")+ 
-  scale_fill_brewer(palette = 'Accent')
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
+
 ```
 
 * Naturally, we recover our top ranking words such as “Perdita” or “Arkham”. But here we also see that Mary Shelley liked the word “until” while H P Lovecraft wrote about “legends”.
@@ -259,7 +265,7 @@ t2_tf_idf %>%
   theme(legend.position = "none") +
   facet_wrap(~ author, ncol = 3, scales = "free") +
   coord_flip()+ 
-  scale_fill_brewer(palette = 'Accent')
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
 ```
 
 Um... I have the indistinct feeling that both Poe and Lovecraft are laughing at us. If there is only one thing in the world that should make you feel uneasy, it's probably laughter from those two.
@@ -291,7 +297,7 @@ p1<-spooky_first_two1 %>%
   geom_col() +
   labs(x = NULL, y = "Number of Appearance") +
   theme(legend.position = "none",axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9))+ 
-  scale_fill_brewer(palette = 'Accent') 
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
 
 p2<-spooky_first_two1 %>%
   ggplot(aes(reorder(first_two,n), n, fill = author), position = position_stack(reverse = TRUE)) +
@@ -300,7 +306,7 @@ p2<-spooky_first_two1 %>%
   theme(legend.position = "none")+
   facet_wrap(~ author, ncol = 3, scales = "free") +
   coord_flip()+ 
-  scale_fill_brewer(palette = 'Accent')
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
 
 layout <- matrix(c(1, 2), 2, 1, byrow = TRUE)
 multiplot(p1, p2, layout = layout)
@@ -367,7 +373,8 @@ t3_tf_idf %>%
   theme(legend.position = "none") +
   facet_wrap(~ author, ncol = 3, scales = "free") +
   coord_flip()+ 
-  scale_fill_brewer(palette = 'Accent')
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
+
 ```
 
 
@@ -408,7 +415,7 @@ t3_tf_idf1 %>%
   theme(legend.position = "none") +
   facet_wrap(~ author, ncol = 3, scales = "free") +
   coord_flip()+ 
-  scale_fill_brewer(palette = 'Accent')
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
 ```
 
 We find:
@@ -492,7 +499,7 @@ Next comes the number of words in a sentence.
 spooky_feature$Nwords <- sapply(gregexpr("\\W+", spooky_feature$text), length) + 1
 ggplot(spooky_feature) + 
   geom_boxplot(aes(x=author, y=Nwords,fill=author))+ 
-  scale_fill_brewer(palette = 'Accent')
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
 ```
 
 * HPL has a relatively long sentence than others while MWS occassionaly write some extrmely long sentence.
@@ -513,7 +520,7 @@ ggplot(spooky_feature) +
       scale_x_log10() +
       theme(legend.position = "none") +
       labs(x = "Number of StopWords")+ 
-  scale_fill_brewer(palette = 'Accent')
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
 ```
 
 * MWS used less stopwords than other two, which could also be found from her trigram.
@@ -539,7 +546,7 @@ spooky_feature$num_of_negation_wrd[is.na(spooky_feature$num_of_negation_wrd)]<-0
 
 ggplot(spooky_feature) + 
   geom_boxplot(aes(x=author, y=num_of_negation_wrd,fill=author))+ 
-  scale_fill_brewer(palette = 'Accent')
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
 
 ```
 
@@ -950,7 +957,129 @@ accuracy
 
 * I also conducted Binary for HPL and MWS, their predicted accuracy results is about 57.18% and 53.75%. Almost guessing...
 
-## 2.LDA Topic Modeling
+## 2.Topic Modeling(LDA)
+
+### 2.1 Sentiment Analysis
+
+We examine the following sentiments using `NRC Sentiment lexicon`           
+The NRC Emotion Lexicon is a list of English words and their associations with eight basic emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust) and two sentiments (negative and positive). The annotations were manually done by crowdsourcing."
+
+From *[Text Mining with R; A Tidy Approach](https://www.tidytextmining.com)*, "When human readers approach text, we use our understanding of the emotional intent of words to infer whether a section of text is positive or negative, or perhaps characterized by some other more nuanced emotion like surprise or disgust.  We can also use the tools of text mining to approach the emotional content of text programmatically."  This is the goal of sentiment analysis.
+
+The plots below show authors with amount of words for different emotions.
+
+```{r, message=FALSE, warning=FALSE}
+plotEmotions = function(emotion,fillColor = fillColor2)
+{
+  nrcEmotions = get_sentiments("nrc") %>% 
+  filter(sentiment == emotion)
+spooky_wrdnew[,-4] %>%
+  inner_join(nrcEmotions)  %>%
+  group_by(author) %>%
+  summarise(Count = n()) %>%
+  ungroup() %>%
+  mutate(author = reorder(author,Count)) %>%
+  
+  ggplot(aes(x = author,y = Count)) +
+  geom_bar(stat='identity',colour="white", fill =fillColor) +
+  geom_text(aes(x = author, y = 1, label = paste0("(",Count,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'author', y = 'Count', 
+       title = paste0('Author and ',emotion,' Words ')) +
+  coord_flip() + 
+  theme_bw()
+}
+trustplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[1])
+fearplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[2])
+negativeplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[3])
+sadnessplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[4])
+angerplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[5])
+surpriseplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[6])
+positiveplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[7])
+disgustplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[8])
+joyplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[9])
+anticipationplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[10])
+layout1 <- matrix(c(1,2,3,4), 2, 2, byrow = TRUE)
+```
+
+First, I plotted relatively "dark" emotions 
+```{r, message=FALSE, warning=FALSE}
+multiplot(disgustplot, fearplot,angerplot,sadnessplot,layout = layout1)
+```
+* MWS is quite emotional and used lots of "dark" words. 
+
+* HPL used more Disgust and Fear words for sentimental expression.
+
+* EAP used more Anger and Sadness words in the sentences.
+
+Then, I plotted other emotions in the sentences
+```{r, message=FALSE, warning=FALSE}
+multiplot(trustplot, surpriseplot,joyplot,anticipationplot,layout = layout1)
+```
+* MWS still used more "normal" and "light" words than others.
+
+* HPL is always the author used least sentiment words in this plot. Compared to lasst plot, HPL is more frequent to use "dark" sentiment description.
+
+Last, I plotted the amount of positive/negative words for each author
+```{r, message=FALSE, warning=FALSE}
+layout2 <- matrix(c(1,2),1, 2, byrow = TRUE)
+multiplot(negativeplot, positiveplot,layout = layout2)
+```
+* Overall, seems like MWS used more sentimental words than other authors. Maybe because female author is more likely to express her feeling. HPL used least sentimental words no matter they are positive or negative.
+
+Next, I used table and plots to see what percentage of their words are sentimental words.
+
+Their total number of words:
+```{r, message=FALSE, warning=FALSE}
+allwords<-as.data.frame(get_sentiments("nrc")$word)
+names(allwords)<-"word"
+emotionwrd<-spooky_wrdnew[,-4] %>%
+  inner_join(allwords) %>%
+  group_by(author) %>%
+  summarise(Count = n()) %>%
+  ungroup() %>%
+  mutate(author = reorder(author,Count)) 
+#emotionwrd
+emotionwrd$Totalwrd<-as.data.frame(table(spooky_wrdnew$author))$Freq
+names(emotionwrd)[2]<-"emotionwrd"
+emotionwrd$percent<-emotionwrd$emotionwrd/emotionwrd$Totalwrd
+emotionwrd
+
+totalwrd<-ggplot(emotionwrd, aes(x = author, y = Totalwrd, fill = author)) + 
+  geom_bar(stat = "identity", colour = "black") + 
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))+
+  geom_text(aes(label = Totalwrd),hjust=0.5,vjust=0, size = 4, colour = 'black',
+            fontface = 'bold')
+```
+Their percentage of emotional words
+```{r, message=FALSE, warning=FALSE}
+peremowrd<-ggplot(emotionwrd,aes(author,percent,fill = author))+
+  geom_bar(stat= 'identity', colour = "black")+ 
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
+multiplot(totalwrd, peremowrd,layout = layout2)
+```
+
+* We could find MWS is quite emotional, Almost 85% of her words(except stopwords) are emotional words, she is almost 25% higher than other two male authors.
+
+* HPL is more introvert when he writes the sentence and didn't show his feelings a lot. HPL is more "machine-like" author who is cool and calm.
+
+We put all emotional feelings together now.
+```{r}
+sentiments <- inner_join(spooky_wrd, get_sentiments('nrc'), by = "word")
+
+ggplot(count(sentiments, author, sentiment)) + 
+  geom_col(aes(sentiment, n, fill = author),position='dodge', colour = "black")+ 
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
+```
+* MWS used Trust, Fear and Sadness most among eight emotional feelings.
+
+* HPL used Fear most and he is the only author who used Negative words more than positive. He is also "mean" using joy.
+
+* EAP used Trust most and lots of Anticipation words.
+
+* Among those emotional words, Surprise and Disgust appeared less than others
 
 
+### 2.2 Topic Modeling
 
