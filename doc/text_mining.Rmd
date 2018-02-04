@@ -59,11 +59,14 @@ This files contains text mining analysis of the SPOOKY data.  You should be able
 
 * Binary Logistics Regression
 
-2.Topic Modeling(LDA)
+**Part 4 Sentiment Analysis**
 
-* Sentiment Analysis
+1.Word Level
 
-* Topic Modeling
+2.Sentence Level
+
+**Part 5 Topic Modeling**
+
 
 # Part 1 Data Preparation{.tabset}
 
@@ -957,9 +960,9 @@ accuracy
 
 * I also conducted Binary for HPL and MWS, their predicted accuracy results is about 57.18% and 53.75%. Almost guessing...
 
-## 2.Topic Modeling(LDA)
+# Part 4 Sentiment Analysis
 
-### 2.1 Sentiment Analysis
+## 1.Word Level
 
 We examine the following sentiments using `NRC Sentiment lexicon`           
 The NRC Emotion Lexicon is a list of English words and their associations with eight basic emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust) and two sentiments (negative and positive). The annotations were manually done by crowdsourcing."
@@ -1080,6 +1083,83 @@ ggplot(count(sentiments, author, sentiment)) +
 
 * Among those emotional words, Surprise and Disgust appeared less than others
 
+## 2.Sentence Level
 
-### 2.2 Topic Modeling
+I used "afinn" sentiment lexicon to score the words in the sentence and calculate the average score for the sentence sentiment. 
+
+First, I will show some "affinn" score. 
+```{r}
+sample_n(get_sentiments("afinn"),10)
+```
+Calculate sentiment scores for each sentence.Showed the highest 10 score amont all sentences
+
+```{r,message=FALSE,warning=FALSE}
+sentiment_lines <-spooky_wrd %>%
+  inner_join(get_sentiments("afinn"), by = "word") %>%
+  group_by(id) %>%
+  summarize(sentiment = mean(score))
+
+sentiment_lines = sentiment_lines %>%
+    right_join(spooky_wrd, by = "id") 
+
+sentiment_lines = sentiment_lines %>% mutate(sentiment = ifelse(is.na(sentiment),0,sentiment))
+
+sentiscore<-sentiment_lines[,1:3]
+sentiscore<-sentiscore[!duplicated(sentiscore),]%>%
+  arrange(desc(sentiment,author))
+
+head(sentiscore,15)
+
+```
+* EAP is way more positive over the setence level tham other authors.The first three sentences are:
+
+**id10196**: "I thought so I knew it hurrah" vociferated Legrand, letting the negro go, and executing a series of curvets and caracols, much to the astonishment of his valet, who, arising from his knees, looked, mutely, from his master to myself, and then from myself to his master.
+
+**id07548**: My original soul seemed, at once, to take its flight from my body and a more than fiendish malevolence, gin nurtured, thrilled every fibre of my frame.
+
+**id25394**: "Superb physiologist" said the Westminster.
+
+Then I calculated the average sentence score for each author.
+
+```{r,message=FALSE,warning=FALSE}
+avescore<-sentiscore%>%
+  group_by(author) %>%
+  summarise(mean(sentiment)) %>%
+  ungroup()
+names(avescore)[2]<-"score"
+
+ggplot(data = avescore ,aes(x = factor(author), y = score, fill = author))+ 
+  geom_bar(stat = 'identity')+ 
+  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
+```
+
+* No surprising that HPL has an average negative score.
+
+* EAP got the highest score is a little surprise because MWS is the author who used more positive and good sentiment words in *nrc* lexicon.
+
+I listed hightest and lowest score setences of each author here(Selected randomly if there are same scores).
+
+Highest:
+
+* EAP(5): id05517: The apartment was superb.
+
+* HPL(4): id20925: Wonderful likewise were the gardens made by Zokkar the olden king.
+
+* MWS(4): id08642: But for one thing he would have been completely triumphant.
+
+Lowest:
+
+* EAP(-4): id22475: In the former, the torture of meditation was excessive in the latter, supreme.
+
+* HPL(-5): id05489: We shall see that at which dogs howl in the dark, and that at which cats prick up their ears after midnight.
+
+* MWS(-4): id11965: Perdita, who then resided with Evadne, saw the torture that Adrian endured.
+
+
+# Part 5 Topic Modeling
+
+
+
+
+
 
