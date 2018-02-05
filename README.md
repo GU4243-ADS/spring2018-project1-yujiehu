@@ -69,105 +69,32 @@ First we want to install and load libraries we need along the way. Note that the
 
 **You need to download "corrplot" & "nnet" packages to run the code for part 4.**
 
-``` r
-packages.used <- c("ggplot2", "dplyr", "tibble", "tidyr",  "stringr", "tidytext", "topicmodels", "wordcloud", "ggridges")
-
-# check packages that need to be installed.
-packages.needed <- setdiff(packages.used, intersect(installed.packages()[,1], packages.used))
-
-# install additional packages
-if(length(packages.needed) > 0) {
-  install.packages(packages.needed, dependencies = TRUE, repos = 'http://cran.us.r-project.org')
-}
-
-library(ggplot2)
-library(dplyr)
-library(tibble)
-library(tidyr)
-library(stringr)
-library(tidytext)
-library(topicmodels)
-library(wordcloud)
-library(ggridges)
-
-source("../libs/multiplot.R")
-```
 
 2. Read Data
 ------------
 
 The following code assumes that the dataset `spooky.csv` lives in a `data` folder (and that we are inside a `docs` folder).
 
-``` r
-spooky <- read.csv('../data/spooky.csv', as.is = TRUE)
-```
+
 
 3. Data Structure Overview
 --------------------------
 
 Let's first remind ourselves of the structure of the data.
 
-``` r
-head(spooky)
-```
-
-    ##        id
-    ## 1 id26305
-    ## 2 id17569
-    ## 3 id11008
-    ## 4 id27763
-    ## 5 id12958
-    ## 6 id22965
-    ##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   text
-    ## 1                                                                                                                                                                                                                                              This process, however, afforded me no means of ascertaining the dimensions of my dungeon; as I might make its circuit, and return to the point whence I set out, without being aware of the fact; so perfectly uniform seemed the wall.
-    ## 2                                                                                                                                                                                                                                                                                                                                                                                                              It never once occurred to me that the fumbling might be a mere mistake.
-    ## 3                                                                                                                                                                                                                                                                             In his left hand was a gold snuff box, from which, as he capered down the hill, cutting all manner of fantastic steps, he took snuff incessantly with an air of the greatest possible self satisfaction.
-    ## 4                                                                                                                                                                                                                                                                       How lovely is spring As we looked from Windsor Terrace on the sixteen fertile counties spread beneath, speckled by happy cottages and wealthier towns, all looked as in former years, heart cheering and fair.
-    ## 5                                                                                                                                                                                                                                                                                                       Finding nothing else, not even gold, the Superintendent abandoned his attempts; but a perplexed look occasionally steals over his countenance as he sits thinking at his desk.
-    ## 6 A youth passed in solitude, my best years spent under your gentle and feminine fosterage, has so refined the groundwork of my character that I cannot overcome an intense distaste to the usual brutality exercised on board ship: I have never believed it to be necessary, and when I heard of a mariner equally noted for his kindliness of heart and the respect and obedience paid to him by his crew, I felt myself peculiarly fortunate in being able to secure his services.
-    ##   author
-    ## 1    EAP
-    ## 2    HPL
-    ## 3    EAP
-    ## 4    MWS
-    ## 5    HPL
-    ## 6    MWS
-
-``` r
-summary(spooky)
-```
-
     ##       id                text              author         
     ##  Length:19579       Length:19579       Length:19579      
     ##  Class :character   Class :character   Class :character  
     ##  Mode  :character   Mode  :character   Mode  :character
 
-``` r
-fillColor = "#FFA07A"
-fillColor2 = "#F1C40F"
-```
 
 We see from the above that each row of our data contains a unique ID, a single sentence text excerpt, and an abbreviated author name. `HPL` is Lovecraft, `MWS` is Shelly, and `EAP` is Poe. We finally note that there are no missing values, and we change author name to be a factor variable, which will help us later on.
-
-``` r
-sum(is.na(spooky))
-```
-
-    ## [1] 0
-
-``` r
-spooky$author <- as.factor(spooky$author)
-```
 
 4. Data Cleaning
 ----------------
 
 We first use the `unnest_tokens()` function to drop all punctuation and transform all words into lower case. At least for now, the punctuation isn't really important to our analysis -- we want to study the words. In addition, `tidytext` contains a dictionary of stop words, like "and" or "next", that we will get rid of for our analysis, the idea being that the non-common words (...maybe the SPOOKY words) that the authors use will be more interesting. If this is new to you, here's a textbook that can help: *[Text Mining with R; A Tidy Approach](https://www.tidytextmining.com)*. It teaches the basic handling of natural language data in `R` using tools from the "tidyverse". The tidy text format is a table with one token per row, where a token is a word.
 
-``` r
-spooky_wrd <- unnest_tokens(spooky, word, text)
-spooky_wrdnew <- anti_join(spooky_wrd, stop_words, by = "word")
-```
 
 Part 2 Data Exploration
 =======================
@@ -181,38 +108,7 @@ Now we study some of the most common words in the entire data set. With the Tuto
 
 Then, I also plotted wordcloud for each author to compare their differences in word using.
 
-``` r
-#Wordcloud for each wuthor
-#Function to generate dataset for each author
-get_common_words_by_author <- function(x, author, remove.stopwords = FALSE){
-  if(remove.stopwords){
-    x <- x %>% dplyr::anti_join(stop_words)
-  }
-  
-  x[x$author == author,] %>%
-    dplyr::count(word, sort = TRUE)
-}
-words_EAP <- get_common_words_by_author(x = spooky_wrd,
-                           author = "EAP",
-                           remove.stopwords = TRUE)
-words_HPL <- get_common_words_by_author(x = spooky_wrd,
-                           author = "HPL",
-                           remove.stopwords = TRUE)
-words_MWS <- get_common_words_by_author(x = spooky_wrd,
-                           author = "MWS",
-                           remove.stopwords = TRUE)
-pal <- brewer.pal(6,"Dark2")
-layout(matrix(c(1,2,3),1,3,byrow = T))
-par(mar = c(0,0,0,0))
-#EAP
-wordcloud(words_EAP$word,words_EAP$n,max.words = 50,colors =pal)
-#HPL
-wordcloud(words_HPL$word,words_HPL$n,max.words = 50,colors =pal)
-#MWS
-wordcloud(words_MWS$word,words_MWS$n,max.words = 50,colors =pal)
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-6-1.png)
+![image](figs/unnamed-chunk-6-1.png)
 
 Compared to the overall word frequency,
 
@@ -226,41 +122,13 @@ Compared to the overall word frequency,
 
 TF stands for term frequency or how often a word appears in a text and it is what is studied above in the word cloud. IDF stands for inverse document frequncy, and it is a way to pay more attention to words that are rare within the entire set of text data that is more sophisticated than simply removing stop words. Multiplying these two values together calculates a term's tf-idf, which is the frequency of a term adjusted for how rarely it is used. We'll use tf-idf as a heuristic index to indicate how frequently a certain author uses a word relative to the frequency that ll the authors use the word. Therefore we will find words that are characteristic for a specific author, a good thing to have if we are interested in solving the author identification problem.
 
-``` r
-frequency <- count(spooky_wrdnew, author, word)
-tf_idf    <- bind_tf_idf(frequency, word, author, n)
-
-tf_idf <- arrange(tf_idf, desc(tf_idf))
-tf_idf <- mutate(tf_idf, word = factor(word, levels = rev(unique(word))))
-tf_idf_30 <- top_n(tf_idf, 30, tf_idf)
-
-ggplot(tf_idf_30) +
-  geom_col(aes(word, tf_idf, fill = author)) +
-  labs(x = NULL, y = "Unigram TF-IDF Values") +
-  theme(legend.position = "top", axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9))+ 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![image](figs/unnamed-chunk-7-1.png)
 
 Note that in the above, many of the words recognized by their tf-idf scores are names. This makes sense -- if we see text referencing Raymond, Idris, or Perdita, we know almost for sure that MWS is the author. But some non-names stand out. EAP often uses "monsieur" and "jupiter" while HPL uses the words "bearded" and "attic" more frequently than the others.
 
 We can also look at the most characteristic terms per author.
 
-``` r
-tf_idf <- ungroup(top_n(group_by(tf_idf, author), 20, tf_idf))
-  
-ggplot(tf_idf) +
-  geom_col(aes(word, tf_idf, fill = author)) +
-  labs(x = NULL, y = "tf-idf") +
-  theme(legend.position = "none") +
-  facet_wrap(~ author, ncol = 3, scales = "free") +
-  coord_flip() +
-  labs(y = "Unigram TF-IDF Values")+ 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![image](figs/unnamed-chunk-8-1.png)
 
 -   Naturally, we recover our top ranking words such as “Perdita” or “Arkham”. But here we also see that Mary Shelley liked the word “until” while H P Lovecraft wrote about “legends”.
 
@@ -275,10 +143,6 @@ Too many arcane words in this section... I have a hard time searching their mean
 
 Let's start with those bigrams. We can extract all of those pairs in a very similar way as the individual words using our magical *tidytext* scissors. Here are a few random examples that will change every time we run this part:
 
-``` r
-t2 <- spooky %>% select(author, text) %>% unnest_tokens(bigram, text, token = "ngrams", n = 2)
-sample_n(t2, 5)
-```
 
     ##        author          bigram
     ## 131497    EAP  near neighbors
@@ -289,50 +153,13 @@ sample_n(t2, 5)
 
 In order to filter out the stop words we need to *separate* the bigrams first, and then later *unite* them back together after the filtering. *Separate/unite* are also the names of the corresponding *dplyr* functions:
 
-``` r
-bi_sep <- t2 %>%
-  separate(bigram, c("word1", "word2"), sep = " ")
-
-bi_filt <- bi_sep %>%
-  filter(!word1 %in% stop_words$word) %>%
-  filter(!word2 %in% stop_words$word)
-
-# for later
-bigram_counts <- bi_filt %>%
-  count(word1, word2, sort = TRUE)
-
-t2 <- bi_filt %>%
-  unite(bigram, word1, word2, sep = " ")
-```
 
 Now we can extract the TF-IDF values.
 
-``` r
-t2_tf_idf <- t2 %>%
-  count(author, bigram) %>%
-  bind_tf_idf(bigram, author, n) %>%
-  arrange(desc(tf_idf))
-```
 
 And then we plot the bigrams with the highest TF-IDF values per *author* and we see that ...
 
-``` r
-t2_tf_idf %>%
-  arrange(desc(tf_idf)) %>%
-  mutate(bigram = factor(bigram, levels = rev(unique(bigram)))) %>%
-  group_by(author) %>%
-  top_n(10, tf_idf) %>%
-  ungroup() %>%  
-  ggplot(aes(bigram, tf_idf, fill = author)) +
-  geom_col() +
-  labs(x = NULL, y = "Bigram TF-IDF Values") +
-  theme(legend.position = "none") +
-  facet_wrap(~ author, ncol = 3, scales = "free") +
-  coord_flip()+ 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-12-1.png)
+![image](figs/unnamed-chunk-12-1.png)
 
 Um... I have the indistinct feeling that both Poe and Lovecraft are laughing at us. If there is only one thing in the world that should make you feel uneasy, it's probably laughter from those two.
 
@@ -350,35 +177,7 @@ Let's find how these authors start their sentence. Does anyone of them have some
 
 *I will use these first words to to generate sentence for each author in the Part 2 (5).Hope It could seem like their own style and become another "spooky novel" *
 
-``` r
-spooky$first_two<-word(spooky$text, 1,2, sep=" ")
-spooky_first_two<-spooky%>%
-  count(author,first_two)%>%
-  arrange(desc(n,author))
-
-spooky_first_two1 <- ungroup(top_n(group_by(spooky_first_two, author), 20, n))
-
-p1<-spooky_first_two1 %>%
-  ggplot(aes(reorder(first_two,n), n, fill = author), position = position_stack(reverse = TRUE)) +
-  geom_col() +
-  labs(x = NULL, y = "Number of Appearance") +
-  theme(legend.position = "none",axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9))+ 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
-
-p2<-spooky_first_two1 %>%
-  ggplot(aes(reorder(first_two,n), n, fill = author), position = position_stack(reverse = TRUE)) +
-  geom_col() +
-  labs(x = NULL, y = "Number of Appearance") +
-  theme(legend.position = "none")+
-  facet_wrap(~ author, ncol = 3, scales = "free") +
-  coord_flip()+ 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
-
-layout <- matrix(c(1, 2), 2, 1, byrow = TRUE)
-multiplot(p1, p2, layout = layout)
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-13-1.png)
+![image](figs/unnamed-chunk-13-1.png)
 
 "It was" is the most popular way to start the sentence for all of these authors. Then come "In the","I was","I had","It is","He was","There was". Seems like my writing style... Simple and nothing special. But when we have a closer look for each author,there comes difference!
 
@@ -401,26 +200,6 @@ multiplot(p1, p2, layout = layout)
 
 Extracting trigrams follows the same procedure as for bigrams. Again we filter out stop words and include a few random examples:
 
-``` r
-t3 <- spooky %>% select(author, text) %>% unnest_tokens(trigram, text, token = "ngrams", n = 3)
-
-tri_sep <- t3 %>%
-  separate(trigram, c("word1", "word2", "word3"), sep = " ")
-
-tri_filt <- tri_sep %>%
-  filter(!word1 %in% stop_words$word) %>%
-  filter(!word2 %in% stop_words$word) %>%
-  filter(!word3 %in% stop_words$word)
-
-# for later
-trigram_counts <- tri_filt %>%
-  count(word1, word2, word3, sort = TRUE)
-
-t3 <- tri_filt %>%
-  unite(trigram, word1, word2, word3, sep = " ")
-
-sample_n(t3, 5)
-```
 
     ##       author                        trigram
     ## 11921    MWS           precious human blood
@@ -431,28 +210,8 @@ sample_n(t3, 5)
 
 And here is the corresponding TF-IDF plot for the most characteristic terms:
 
-``` r
-t3_tf_idf <- t3 %>%
-  count(author, trigram) %>%
-  bind_tf_idf(trigram, author, n) %>%
-  arrange(desc(tf_idf))
 
-t3_tf_idf %>%
-  arrange(desc(tf_idf)) %>%
-  mutate(trigram = factor(trigram, levels = rev(unique(trigram)))) %>%
-  group_by(author) %>%
-  top_n(5, tf_idf) %>%
-  ungroup() %>%  
-  ggplot(aes(trigram, tf_idf, fill = author)) +
-  geom_col() +
-  labs(x = NULL, y = "Trigram TF-IDF Values Without Stopwords") +
-  theme(legend.position = "none") +
-  facet_wrap(~ author, ncol = 3, scales = "free") +
-  coord_flip()+ 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-15-1.png)
+![image](figs/unnamed-chunk-15-1.png)
 
 We find:
 
@@ -466,34 +225,7 @@ We find:
 
 This time let's put stopwords into consideration and see whether it could add more interests in their expression.
 
-``` r
-trigram_counts2 <- tri_sep %>%
-  count(word1, word2, word3, sort = TRUE)
-
-t31 <- tri_sep %>%
-  unite(trigram, word1, word2, word3, sep = " ")
-
-t3_tf_idf1 <- t31 %>%
-  count(author, trigram) %>%
-  bind_tf_idf(trigram, author, n) %>%
-  arrange(desc(tf_idf))
-
-t3_tf_idf1 %>%
-  arrange(desc(tf_idf)) %>%
-  mutate(trigram = factor(trigram, levels = rev(unique(trigram)))) %>%
-  group_by(author) %>%
-  top_n(5, tf_idf) %>%
-  ungroup() %>%  
-  ggplot(aes(trigram, tf_idf, fill = author)) +
-  geom_col() +
-  labs(x = NULL, y = "Trigram TF-IDF Values With Stopwords") +
-  theme(legend.position = "none") +
-  facet_wrap(~ author, ncol = 3, scales = "free") +
-  coord_flip()+ 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-16-1.png)
+![image](figs/unnamed-chunk-16-1.png)
 
 We find:
 
@@ -524,23 +256,7 @@ We may find some traces how these author *cooking* their horrible books!
 
 Some these features have been borrowed from Kaggler *jayjay* 's kernel found [here](https://www.kaggle.com/jayjay75/text2vec-glmnet). Great work jayjay!
 
-``` r
-createFE = function(ds)
-{
-  ds = ds %>%
-  mutate(Ncommas = str_count(ds$text, ",")) %>%
-  mutate(Nsemicolumns = str_count(ds$text, ";")) %>%
-  mutate(Ncolons = str_count(ds$text, ":")) %>%
-  mutate(Nblank = str_count(ds$text, " ")) %>%
-  mutate(Nother = str_count(ds$text, "[\\.\\.]")) %>%
-  mutate(Ncapitalfirst = str_count(ds$text, " [A-Z][a-z]")) %>%
-  mutate(Ncapital = str_count(ds$text, "[A-Z]")) %>%
-  mutate(Nquestion = str_count(ds$text,"\\?")) 
 
-  return(ds)
-}
-spooky_feature = createFE(spooky)
-```
 
 ### 4.1 Sentence Ingredients
 
@@ -548,42 +264,13 @@ Here comes their "Sentence Ingredients"! This part tell us How Much Special Ingr
 
 First is the number of Capital they used
 
-``` r
-spooky_feature %>%
-  group_by(author) %>%
-  summarise(SumCapital = sum(Ncapital,na.rm = TRUE)) %>%
-  ungroup() %>%
-  mutate(author = reorder(author,SumCapital)) %>%
-  
-  ggplot(aes(x = author,y = SumCapital)) +
-  geom_bar(stat='identity',colour="white", fill = fillColor) +
-  geom_text(aes(x = author, y = 1, label = paste0("(",SumCapital,")",sep="")),
-            hjust=0, vjust=.5, size = 4, colour = 'black',
-            fontface = 'bold') +
-  labs(x = 'Author', 
-       y = 'Numbers', 
-       title = 'Total Number of Capital Letters') +
-  coord_flip() + 
-  theme_bw()
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-18-1.png)
+![image](figs/unnamed-chunk-18-1.png)
 
 -   Seems like EAP used more Capital Letters, but there are also more sentence included in the dataset writen by EAP.(EAP,HPL,MWS :7900,5635,6044) After calculating the Captical Letters Per Sentence, HPL won! EAP and MWS have an average of 2.2 per sentence while HPL has 2.4.
 
 Next comes the number of words in a sentence.
 
-``` r
-spooky_feature$Nwords <- sapply(gregexpr("\\W+", spooky_feature$text), length) + 1
-ggplot(spooky_feature) + 
-  geom_boxplot(aes(x=author, y=Nwords,fill=author))+ 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))+
-  labs(x = 'Author', 
-       y = 'Number of Words', 
-       title = 'Total Number of Words') 
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-19-1.png)
+![image](figs/unnamed-chunk-19-1.png)
 
 -   HPL has a relatively long sentence than others while MWS occassionaly write some extrmely long sentence.
 
@@ -591,22 +278,7 @@ ggplot(spooky_feature) +
 
 Then comes number of stopwords in a sentence
 
-``` r
-nostopword<-as.data.frame(table(spooky_wrdnew$id))
-names(nostopword)<-c("id","num_of_nostop_wrd")
-spooky_feature<-merge(spooky_feature,nostopword,by="id",all=T)
-spooky_feature$num_of_nostop_wrd[is.na(spooky_feature$num_of_nostop_wrd)]<-0
-spooky_feature$Nstop<-spooky_feature$Nwords - spooky_feature$num_of_nostop_wrd
-
-ggplot(spooky_feature) +
-      geom_density_ridges(aes(Nstop, author, fill = author)) +
-      scale_x_log10() +
-      theme(legend.position = "none") +
-      labs(x = "Number of StopWords")+ 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-20-1.png)
+![image](figs/unnamed-chunk-20-1.png)
 
 -   MWS used less stopwords than other two, which could also be found from her trigram.
 
@@ -621,23 +293,7 @@ Different from negative words in sentiment analysis,including:
 
 I didn't find an existing word list for this. So I just generated a list by myself. Correct me if I am wrong.
 
-``` r
-negation<-c("no","not","none","nobody","nothing","neither","nowhere","never","hardly","scarcely","barely","doesn't","isn't","wasn't","shouldn't","wouldn't","didn't","won't","can't","little","few","nor","neither","without","unless","wa'n't","dun't","dxn't","aren't","hasn't","couldn't","hadn't","don't","mustn't","ain't","haven't","wudn't","weren't")
-spooky_wrd$negation <- spooky_wrd$word %in% negation
-negationwrd<-as.data.frame(table(spooky_wrd$id[spooky_wrd$negation==T] ))
-names(negationwrd)<-c("id","num_of_negation_wrd")
-spooky_feature<-merge(spooky_feature,negationwrd,by="id",all=T)
-spooky_feature$num_of_negation_wrd[is.na(spooky_feature$num_of_negation_wrd)]<-0
-
-ggplot(spooky_feature) + 
-  geom_boxplot(aes(x=author, y=num_of_negation_wrd,fill=author))+ 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))+
-  labs(x = 'Author', 
-       y = 'Number of Negation Words', 
-       title = 'Total Number of Negation Words') 
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-21-1.png)
+![image](figs/unnamed-chunk-21-1.png)
 
 -   They almost have the same performance and only EAP may use a little more negation words.
 
@@ -647,80 +303,7 @@ Overall, we could find HPL has a very good writing habit, moderate length, moder
 
 After checking their ingradients, what did they put for the "Flavour"? The bar plot shows the authors with the Total Number of Commas, SemiColons, Colons, Questions used by them. Still, be careful because EAP appeared more ofen than others.
 
-``` r
-p1<-spooky_feature %>%
-  group_by(author) %>%
-  summarise(SumCommas = sum(Ncommas,na.rm = TRUE)) %>%
-  ungroup() %>%
-  mutate(author = reorder(author,SumCommas)) %>%
-  
-  ggplot(aes(x = author,y = SumCommas)) +
-  geom_bar(stat='identity',colour="white", fill = fillColor2) +
-  geom_text(aes(x = author, y = 1, label = paste0("(",SumCommas,")",sep="")),
-            hjust=0, vjust=.5, size = 4, colour = 'black',
-            fontface = 'bold') +
-  labs(x = 'author', 
-       y = 'Commas', 
-       title = 'Total Number of Commas') +
-  coord_flip() + 
-  theme_bw()
-
-p2<-spooky_feature %>%
-  group_by(author) %>%
-  summarise(SumSemiColons = sum(Nsemicolumns,na.rm = TRUE)) %>%
-  ungroup() %>%
-  mutate(author = reorder(author,SumSemiColons)) %>%
-  
-  ggplot(aes(x = author,y = SumSemiColons)) +
-  geom_bar(stat='identity',colour="white", fill = fillColor) +
-  geom_text(aes(x = author, y = 1, label = paste0("(",SumSemiColons,")",sep="")),
-            hjust=0, vjust=.5, size = 4, colour = 'black',
-            fontface = 'bold') +
-  labs(x = 'author', 
-       y = 'SemiColons', 
-       title = 'Total Number of SemiColons') +
-  coord_flip() + 
-  theme_bw()
-
-p3<-spooky_feature %>%
-  group_by(author) %>%
-  summarise(SumColons = sum(Ncolons,na.rm = TRUE)) %>%
-  ungroup() %>%
-  mutate(author = reorder(author,SumColons)) %>%
-  
-  ggplot(aes(x = author,y = SumColons)) +
-  geom_bar(stat='identity',colour="white", fill = fillColor2) +
-  geom_text(aes(x = author, y = 1, label = paste0("(",SumColons,")",sep="")),
-            hjust=0, vjust=.5, size = 4, colour = 'black',
-            fontface = 'bold') +
-  labs(x = 'author', 
-       y = 'Colons', 
-       title = 'Total Number of Colons') +
-  coord_flip() + 
-  theme_bw()
-
-p4<-spooky_feature %>%
-  group_by(author) %>%
-  summarise(SumQuestions = sum(Nquestion,na.rm = TRUE)) %>%
-  ungroup() %>%
-  mutate(author = reorder(author,SumQuestions)) %>%
-  
-  ggplot(aes(x = author,y = SumQuestions)) +
-  geom_bar(stat='identity',colour="white", fill = fillColor) +
-  geom_text(aes(x = author, y = 1, label = paste0("(",SumQuestions,")",sep="")),
-            hjust=0, vjust=.5, size = 4, colour = 'black',
-            fontface = 'bold') +
-  labs(x = 'author', 
-       y = 'Questions', 
-       title = 'Total Number of Questions') +
-  coord_flip() + 
-  theme_bw()
-
-layout <- matrix(c(1, 2, 3, 4), 2, 2, byrow = TRUE)
-multiplot(p1, p2, p3,p4, layout = layout)
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-22-1.png)
+![image](figs/unnamed-chunk-22-1.png)
 
 -   HPL cherishes his Commas, Colons and Questions and only used little seasoning...
 
@@ -743,65 +326,6 @@ According to what we got from Part 2 (2.2), I generated sentences using the most
 *If there are imporper word inputed(such as "i" & "no" which couldn't be linked together used as approporite starting words for a sentence), it will print "Change the starting words or sentence length/Rerun the code"*
 
 ``` r
-#trigram of authors
-trigrams_EAP <- spooky %>%
-        filter(author == "EAP") %>%
-        unnest_tokens(trigram, text, token = "ngrams",to_lower = TRUE, n= 3) %>%
-        separate(trigram, c("word1", "word2", "word3"), sep = " ") %>%
-        count(word1, word2,word3, sort = TRUE)
-trigrams_HPL <- spooky %>%
-        filter(author == "HPL") %>%
-        unnest_tokens(trigram, text, token = "ngrams",to_lower = TRUE, n= 3) %>%
-        separate(trigram, c("word1", "word2", "word3"), sep = " ") %>%
-        count(word1, word2,word3, sort = TRUE)
-trigrams_MWS <- spooky %>%
-        filter(author == "MWS") %>%
-        unnest_tokens(trigram, text, token = "ngrams",to_lower = TRUE, n= 3) %>%
-        separate(trigram, c("word1", "word2", "word3"), sep = " ") %>%
-        count(word1, word2,word3, sort = TRUE)
-
-##sentence generator
-return_third_word <- function( woord1, woord2,authordata){
-        temp<-authordata%>%
-          filter_(~word1 == woord1, ~word2 == woord2)
-        if (dim(temp)[1]==0){
-          print("Change the starting words or sentence length you inputed/Rerun the code")
-        }
-        else{
-        woord <- temp %>%
-                sample_n(size=1, weight = n,replace = T) %>%
-                .[["word3"]]
-        #seems useless?
-        if(length(woord) == 0){
-                bleh <- filter_(authordata, ~word1 == woord2) %>%
-                        sample_n(1, weight = n)
-                warning("no word found, adding ", bleh, "to", woord1 , woord2)
-                woord <- bleh
-        }
-        woord
-        }
-}
-#for test: return_third_word("i","s",trigrams_EAP)
-generate_sentence <- function(word1, word2,authordata, sentencelength =5, debug =FALSE){
-        #input validation
-        #if(sentencelength <3)stop("I need more to work with")
-        sentencelength <- sentencelength -2
-        # starting
-        sentence <- c(word1, word2)
-        woord1 <- word1
-        woord2 <- word2
-        for(i in seq_len(sentencelength)){
-                #if(debug == TRUE)print(i)
-                word <- return_third_word( woord1, woord2, authordata )
-               # if(return_third_word( woord1, woord2, authordata )=="Change the word you inputed")
-                #  print("Rerun please")else
-                sentence <- c(sentence, word)
-                woord1 <- woord2
-                woord2 <- word
-        }
-        output <-paste(sentence, collapse = " ")
-        output
-}
 generate_sentence("it", "was",trigrams_EAP, 6)
 ```
 
@@ -957,48 +481,11 @@ From *[Text Mining with R; A Tidy Approach](https://www.tidytextmining.com)*, "W
 
 The plots below show authors with amount of words for different emotions.
 
-``` r
-plotEmotions = function(emotion,fillColor = fillColor2)
-{
-  nrcEmotions = get_sentiments("nrc") %>% 
-  filter(sentiment == emotion)
-spooky_wrdnew[,-4] %>%
-  inner_join(nrcEmotions)  %>%
-  group_by(author) %>%
-  summarise(Count = n()) %>%
-  ungroup() %>%
-  mutate(author = reorder(author,Count)) %>%
-  
-  ggplot(aes(x = author,y = Count)) +
-  geom_bar(stat='identity',colour="white", fill =fillColor) +
-  geom_text(aes(x = author, y = 1, label = paste0("(",Count,")",sep="")),
-            hjust=0, vjust=.5, size = 4, colour = 'black',
-            fontface = 'bold') +
-  labs(x = 'author', y = 'Count', 
-       title = paste0('Author and ',emotion,' Words ')) +
-  coord_flip() + 
-  theme_bw()
-}
-trustplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[1])
-fearplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[2])
-negativeplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[3])
-sadnessplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[4])
-angerplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[5])
-surpriseplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[6])
-positiveplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[7])
-disgustplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[8])
-joyplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[9])
-anticipationplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[10])
-layout1 <- matrix(c(1,2,3,4), 2, 2, byrow = TRUE)
-```
+
 
 First, I plotted relatively "dark" emotions
 
-``` r
-multiplot(disgustplot, fearplot,angerplot,sadnessplot,layout = layout1)
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-27-1.png)
+![image](figs/unnamed-chunk-27-1.png)
 
 -   MWS is quite emotional and used lots of "dark" words.
 
@@ -1008,11 +495,7 @@ multiplot(disgustplot, fearplot,angerplot,sadnessplot,layout = layout1)
 
 Then, I plotted other emotions in the sentences
 
-``` r
-multiplot(trustplot, surpriseplot,joyplot,anticipationplot,layout = layout1)
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-28-1.png)
+![image](figs/unnamed-chunk-28-1.png)
 
 -   MWS also used more "normal" and "light" words than others.
 
@@ -1020,12 +503,7 @@ multiplot(trustplot, surpriseplot,joyplot,anticipationplot,layout = layout1)
 
 Last, I plotted the amount of positive/negative words for each author
 
-``` r
-layout2 <- matrix(c(1,2),1, 2, byrow = TRUE)
-multiplot(negativeplot, positiveplot,layout = layout2)
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-29-1.png)
+![image](figs/unnamed-chunk-29-1.png)
 
 -   Overall, seems like MWS used more sentimental words than other authors. Maybe because female author is more likely to express her feeling. HPL used least sentimental words no matter they are positive or negative.
 
@@ -1033,21 +511,6 @@ Next, I used table and plots to see what percentage of their words are sentiment
 
 Their total number of words:
 
-``` r
-allwords<-as.data.frame(get_sentiments("nrc")$word)
-names(allwords)<-"word"
-emotionwrd<-spooky_wrdnew[,-4] %>%
-  inner_join(allwords) %>%
-  group_by(author) %>%
-  summarise(Count = n()) %>%
-  ungroup() %>%
-  mutate(author = reorder(author,Count)) 
-#emotionwrd
-emotionwrd$Totalwrd<-as.data.frame(table(spooky_wrdnew$author))$Freq
-names(emotionwrd)[2]<-"emotionwrd"
-emotionwrd$percent<-emotionwrd$emotionwrd/emotionwrd$Totalwrd
-emotionwrd
-```
 
     ## # A tibble: 3 x 4
     ##   author emotionwrd Totalwrd percent
@@ -1056,26 +519,11 @@ emotionwrd
     ## 2 HPL         36626    62371   0.587
     ## 3 MWS         52743    62492   0.844
 
-``` r
-totalwrd<-ggplot(emotionwrd, aes(x = author, y = Totalwrd, fill = author)) + 
-  geom_bar(stat = "identity", colour = "black") + 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))+
-  geom_text(aes(label = Totalwrd),hjust=0.5,vjust=0, size = 4, colour = 'black',
-            fontface = 'bold')+
-  labs(x = NULL, y = "Total Number of Words") 
-```
+
 
 Their percentage of emotional words
 
-``` r
-peremowrd<-ggplot(emotionwrd,aes(author,percent,fill = author))+
-  geom_bar(stat= 'identity', colour = "black")+ 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))+
-  labs(x = NULL, y = "Percentage of Emotion Words") 
-multiplot(totalwrd, peremowrd,layout = layout2)
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-31-1.png)
+![image](figs/unnamed-chunk-31-1.png)
 
 -   We could find MWS is quite emotional, Almost 85% of her words(except stopwords) are emotional words, she is almost 25% higher than other two male authors.
 
@@ -1083,16 +531,7 @@ multiplot(totalwrd, peremowrd,layout = layout2)
 
 We put all emotional feelings together now.
 
-``` r
-sentiments <- inner_join(spooky_wrd, get_sentiments('nrc'), by = "word")
-
-ggplot(count(sentiments, author, sentiment)) + 
-  geom_col(aes(sentiment, n, fill = author),position='dodge', colour = "black")+ 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))+
-  labs(x = NULL, y = "Count") 
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-32-1.png)
+![image](figs/unnamed-chunk-32-1.png)
 
 -   MWS used Trust, Fear and Sadness most among eight emotional feelings.
 
@@ -1129,23 +568,9 @@ sample_n(get_sentiments("afinn"),10)
     ##  9 join             1
     ## 10 perpetrators    -2
 
-Calculate sentiment scores for each sentence. Showed the highest 10 score among all sentences
+Calculate sentiment scores for each sentence. Showed the highest 15 score among all sentences
 
 ``` r
-sentiment_lines <-spooky_wrd %>%
-  inner_join(get_sentiments("afinn"), by = "word") %>%
-  group_by(id) %>%
-  summarize(sentiment = mean(score))
-
-sentiment_lines = sentiment_lines %>%
-    right_join(spooky_wrd, by = "id") 
-
-sentiment_lines = sentiment_lines %>% mutate(sentiment = ifelse(is.na(sentiment),0,sentiment))
-
-sentiscore<-sentiment_lines[,1:3]
-sentiscore<-sentiscore[!duplicated(sentiscore),]%>%
-  arrange(desc(sentiment,author))
-
 head(sentiscore,15)
 ```
 
@@ -1178,20 +603,7 @@ head(sentiscore,15)
 
 Then I calculated the average sentence score for each author.
 
-``` r
-avescore<-sentiscore%>%
-  group_by(author) %>%
-  summarise(mean(sentiment)) %>%
-  ungroup()
-names(avescore)[2]<-"score"
-
-ggplot(data = avescore ,aes(x = factor(author), y = score, fill = author))+ 
-  geom_bar(stat = 'identity')+ 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))+
-  labs(x = "Author", y = "Average Sentiment Score") 
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-35-1.png)
+![image](figs/unnamed-chunk-35-1.png)
 
 -   No surprising that HPL has a negative average score.
 
@@ -1235,49 +647,21 @@ Links:
 
 First I added sentence length(characters) and word length(characters) to dataset.
 
-``` r
-spooky$sen_length <- str_length(spooky$text) 
-spooky_wrdnew$word_length <- str_length(spooky_wrdnew$word)
-```
+
 
 Used correlation plots to delete variables which have high correlations.
 
 *You may need to download the package **corrplot** to run the code.*
 
-``` r
-spooky_feature$sen_length<-spooky$sen_length
-regressiondata<-spooky_feature[,c(-1,-2,-4,-8,-9,-10,-14)]
-#install.packages("corrplot")
-library(corrplot)
-```
-
-    ## corrplot 0.84 loaded
-
-``` r
-m<-cor(regressiondata[,2:10])
-corrplot(m, type = "upper", order = "hclust", tl.col = "black", tl.srt = 45,method = "number")
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-37-1.png)
+![image](figs/unnamed-chunk-37-1.png)
 
 I found number of words has a high correlation with number of stopwords,so I deleted the number of stop words from the variables. Correlation again.
 
-``` r
-regressiondata<-regressiondata[,-8]
-m1<-cor(regressiondata[,2:9])
-corrplot.mixed(m1, lower.col = "black", number.cex = .7)
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-38-1.png)
+![image](figs/unnamed-chunk-38-1.png)
 
 Separate dataset into train and test.
 
-``` r
-set.seed(4243)
-sample<-sample.int(n=nrow(regressiondata),size=floor(0.75*nrow(regressiondata)),replace=F)
-train<-regressiondata[sample, ]
-test<-regressiondata[-sample, ]
-```
+
 
 Here comes my nightmare...
 
@@ -1326,28 +710,6 @@ Used stepwise to get a better model.
 ``` r
 stepmult<-step(mult,trace=0)  
 ```
-
-    ## trying - Ncommas 
-    ## trying - Nsemicolumns 
-    ## trying - Ncolons 
-    ## trying - Ncapital 
-    ## trying - Nquestion 
-    ## trying - Nwords 
-    ## trying - num_of_negation_wrd 
-    ## trying - sen_length 
-    ## # weights:  27 (16 variable)
-    ## initial  value 16132.022847 
-    ## iter  10 value 15275.822528
-    ## iter  20 value 14950.860610
-    ## final  value 14950.705466 
-    ## converged
-    ## trying - Ncommas 
-    ## trying - Nsemicolumns 
-    ## trying - Ncolons 
-    ## trying - Ncapital 
-    ## trying - Nquestion 
-    ## trying - Nwords 
-    ## trying - num_of_negation_wrd
 
 ``` r
 summary(stepmult)
@@ -1445,18 +807,6 @@ Logistic regression could be used on our data to make binary choices like is it 
 I will show one example (EAP or Not) here and give the result of the other two.
 
 Prepare the dataset
-
-``` r
-EAPorNot<-regressiondata
-EAPorNot$author<-as.character(EAPorNot$author)
-EAPorNot$author[which(EAPorNot$author!="EAP")]<-"Others"
-EAPorNot$author<-as.factor(EAPorNot$author)
-
-set.seed(4243)
-sample1<-sample.int(n=nrow(EAPorNot),size=floor(0.75*nrow(EAPorNot)),replace=F)
-train1<-EAPorNot[sample1, ]
-test1<-EAPorNot[-sample1, ]
-```
 
 Conduct regression
 
@@ -1601,17 +951,6 @@ spooky_wrd_tm
     ## Maximal term length: 19
     ## Weighting          : term frequency (tf)
 
-``` r
-length(unique(spooky_wrdnew$id))
-```
-
-    ## [1] 19467
-
-``` r
-length(unique(spooky_wrdnew$word))
-```
-
-    ## [1] 24941
 
 For LDA we must pick the number of possible topics. I searched through works generated by these authors and only MWS has a relatively limited works. EAP and HPL has lots of short novels with diversed topics. Let's try 9, though this selection is admittedly arbitrary.
 
@@ -1638,18 +977,7 @@ spooky_wrd_topics
 
 We note that in the above we use the `tidy` function to extract the per-topic-per-word probabilities, called "beta" or *β*, for the model. The final output has a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term “content” has a 1.619628 × 10<sup>−5</sup> probability of being generated from topic 4. We visualizae the top terms (meaning the most likely terms associated with each topic) in the following.
 
-``` r
-spooky_wrd_topics_5 <- ungroup(top_n(group_by(spooky_wrd_topics, topic), 5, beta))%>%
-  arrange(topic, -beta)%>%
-  mutate(term = reorder(term, beta))
-
-ggplot(spooky_wrd_topics_5) +
-  geom_col(aes(term, beta, fill = factor(topic)), show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free", ncol = 3) +
-  coord_flip()
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-49-1.png)
+![image](figs/unnamed-chunk-49-1.png)
 
 The results of 9 topics is almost the same with the first 9 topics in 12 topics. The next three topics in tutorial has some unique words like "moment" in topic 8; "moon","called" in topic 9; "air" in topic 10. I may check the difference latter.
 
@@ -1689,16 +1017,7 @@ Now that we have these topic probabilities, we can see how well our unsupervised
 
 we can visualize the per-author-per-topic probability for each.
 
-``` r
-# reorder titles in order of topic 1, topic 2, etc before plotting
-new_documents_gamma %>%
-  mutate(author = reorder(author, gamma * topic)) %>%
-  ggplot(aes(factor(topic), gamma)) +
-  geom_boxplot() +
-  facet_wrap(~ author)
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-52-1.png)
+![image](figs/unnamed-chunk-52-1.png)
 
 -   MWS showed a perference to topic 1,5,6,7.
 
@@ -1762,24 +1081,8 @@ confused
     ## 10   4.00 EAP     7111
     ## # ... with 17 more rows
 
-``` r
-p3<-ggplot(confused, aes(factor(.topic), Count,fill=author)) +
-  geom_bar(stat='identity') +
-  facet_wrap(~ author)+
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
 
-p2<-ggplot(confused, aes(factor(.topic), Count,fill=author)) +
-  geom_bar(stat='identity', position = 'dodge') + 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
-
-p1<-ggplot(confused, aes(factor(.topic), Count,fill=author)) +
-  geom_bar(stat='identity') + 
-  scale_fill_manual(values = c("#689420", "#FFCC66",fillColor))
-layout <- matrix(c(1, 2,3), 3, 1, byrow = TRUE)
-multiplot(p1, p2,p3, layout = layout)
-```
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-54-1.png)
+![image](figs/unnamed-chunk-54-1.png)
 
 -   Overall, Topics 2 and 9 are common topics among all authors.
 
