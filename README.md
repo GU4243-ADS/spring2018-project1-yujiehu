@@ -254,12 +254,12 @@ At last, it is the number of negation words in a sentence.
 
 **Negation Words**:
 Different from negative words in sentiment analysis,including:  
-*Negative words*:   no,not,none,no one,nobody,nothing,neither,nowhere,never  
+*Negative words*:    no,not,none,no one,nobody,nothing,neither,nowhere,never  
 *Negative Adverbs*: hardly,scarcely,barely  
 *Negative verbs*:   doesn’t,isn’t,wasn’t,shouldn’t,wouldn’t,couldn’t,won’t,can’t,don’t  
 *Others*:           little,few,nor,without,unless...  
 
-I didn't find an existing word list for this. So I just generated a list by myself. Correct me if I am wrong.
+I didn't find an existing word list for this. So I generated a list by myself. Correct me if I am wrong.
 
 ![image](figs/unnamed-chunk-21-1.png)
 
@@ -269,13 +269,13 @@ Overall, we could find HPL has a very good writing habit, moderate length, moder
 
 ### 4.2 Sentence Seasoning(Punctuations)
 
-After checking their ingradients, what did they put for the "Flavour"? The bar plot shows the authors with the Total Number of Commas, SemiColons, Colons, Questions used by them. Still, be careful because EAP appeared more ofen than others.
+After checking their ingradients, what did they put for the "Flavour"? The bar plot shows the authors with the Total Number of Commas, SemiColons, Colons, Questions used by them. Still, be careful because EAP's sentence appeared more ofen than others.
 
 ![image](figs/unnamed-chunk-22-1.png)
 
--   HPL cherishes his Commas, Colons and Questions and only used little seasoning...
+-   HPL cherishes his Commas, Colons and Questions and only used little seasoning.
 
--   MWS is almost wasting Semicolons and Colons compared to others...
+-   MWS is almost wasting Semicolons and Colons compared to others.
 
 ## 5. Sentence Generation
 ----------------------
@@ -311,7 +311,7 @@ generate_sentence("i", "was",trigrams_MWS, 6)
 
     ## [1] "i was led by my sudden"
 
-Examples with the most frequent starting words for each author:
+**Examples with the most frequent starting words for each author:**
 
 \*EAP
 
@@ -355,7 +355,7 @@ I didn't get too much insight from the "Machine Sentence" hhh. From my perspecti
 
 We could explore more about how those authors describe the world or life or anything else in their sentence by changing the first two words. This may reflect their attitudes and values.
 
-How they describe the world
+**How they describe the world**
 
 ``` r
 generate_sentence("world", "was",trigrams_EAP, 6)
@@ -393,7 +393,7 @@ generate_sentence("world", "was",trigrams_MWS, 6)
 
 \[1\] "the world is come before dawn i led a young"
 
-How they describe life.
+**How they describe life.**
 
 ``` r
 generate_sentence("life", "was",trigrams_EAP, 6)
@@ -411,10 +411,8 @@ generate_sentence("life", "was",trigrams_HPL, 6)
 generate_sentence("life", "was",trigrams_MWS, 6)
 ```
 
-    ## [1] "Change the starting words or sentence length you inputed/Rerun the code"
-    ## [1] "Change the starting words or sentence length you inputed/Rerun the code"
-
-    ## [1] "life was now doing Change the starting words or sentence length you inputed/Rerun the code Change the starting words or sentence length you inputed/Rerun the code"
+ 
+    ## [1] "life was now doing Change the starting words or sentence length you inputed/Rerun the code "
 
 \*EAP
 
@@ -443,15 +441,15 @@ Part 3 Sentiment Analysis
 -------------
 
 We examine the following sentiments using `NRC Sentiment lexicon`
-The NRC Emotion Lexicon is a list of English words and their associations with eight basic emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust) and two sentiments (negative and positive). The annotations were manually done by crowdsourcing."
+The NRC Emotion Lexicon is a list of English words and their associations with eight basic emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust) and two sentiments (negative and positive). The annotations were manually done by crowdsourcing.
 
 From *[Text Mining with R; A Tidy Approach](https://www.tidytextmining.com)*, "When human readers approach text, we use our understanding of the emotional intent of words to infer whether a section of text is positive or negative, or perhaps characterized by some other more nuanced emotion like surprise or disgust. We can also use the tools of text mining to approach the emotional content of text programmatically." This is the goal of sentiment analysis.
 
-The plots below show authors with amount of words for different emotions.
+The plots below show authors with different amount of sentiment words.
 
 
 
-First, I plotted relatively "dark" emotions
+First, I plotted relatively "dark" emotions.
 
 ![image](figs/unnamed-chunk-27-1.png)
 
@@ -461,7 +459,7 @@ First, I plotted relatively "dark" emotions
 
 -   EAP used more Anger and Sadness words in the sentences.
 
-Then, I plotted other emotions in the sentences
+Then, I plotted other emotions in the sentences.
 
 ![image](figs/unnamed-chunk-28-1.png)
 
@@ -469,7 +467,7 @@ Then, I plotted other emotions in the sentences
 
 -   HPL is always the author used least sentiment words in this plot. Compared to lasst plot, HPL is more frequent to use "dark" sentiment words
 
-Last, I plotted the amount of positive/negative words for each author
+Last, I plotted the amount of positive/negative words for each author.
 
 ![image](figs/unnamed-chunk-29-1.png)
 
@@ -477,7 +475,7 @@ Last, I plotted the amount of positive/negative words for each author
 
 Next, I used table and plots to see what percentage of their words are sentimental words.
 
-Their total number of words:
+Their total number of words & percentage of sentiment words:
 
 
     ## # A tibble: 3 x 4
@@ -489,7 +487,7 @@ Their total number of words:
 
 
 
-Their percentage of emotional words
+Their percentage of emotional words.
 
 ![image](figs/unnamed-chunk-31-1.png)
 
@@ -514,9 +512,9 @@ We put all emotional feelings together now.
 
 I examine the following sentiments using `afinn Sentiment lexicon`
 The AFINN lexicon assigns words with a score that runs between -5 and 5, with negative scores indicating negative sentiment and positive scores indicating positive sentiment.
-I used "afinn" sentiment lexicon to score the words in the sentence and calculate the average score for the sentence sentiment.
+I used `afinn sentiment lexicon` to score the words in the sentence and calculate the average score for the sentence sentiment.
 
-First, I will show some "affinn" score.
+First, I will show some `affinn score.
 
 ``` r
 sample_n(get_sentiments("afinn"),10)
@@ -536,7 +534,7 @@ sample_n(get_sentiments("afinn"),10)
     ##  9 join             1
     ## 10 perpetrators    -2
 
-Calculate sentiment scores for each sentence. Showed the highest 15 score among all sentences
+Calculated sentiment scores for each sentence and showed the highest 15 score among all sentences
 
 ``` r
 head(sentiscore,15)
@@ -561,7 +559,7 @@ head(sentiscore,15)
     ## 14 id21073      4.00 HPL   
     ## 15 id08642      4.00 MWS
 
-\*EAP is way more positive over the setence level tham other authors. Sentences with the highest score are:
+\*EAP is way more positive than other authors over the setence level. Sentences with the highest score are:
 
 **id10196**: "I thought so I knew it hurrah" vociferated Legrand, letting the negro go, and executing a series of curvets and caracols, much to the astonishment of his valet, who, arising from his knees, looked, mutely, from his master to myself, and then from myself to his master.
 
@@ -575,7 +573,7 @@ Then I calculated the average sentence score for each author.
 
 -   No surprising that HPL has a negative average score.
 
--   It is a little surprise when I found EAP got the highest score. because MWS is the author who used more positive and good sentiment words in *NRC* lexicon.
+-   It is a little surprise when I found EAP got the highest score. because MWS is the author who used more positive and good sentiment words in `NRC lexicon`.
 
 I listed hightest and lowest score setences of each author here(Selected randomly if there are same scores).
 
