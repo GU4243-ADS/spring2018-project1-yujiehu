@@ -110,8 +110,6 @@ Then, I also plotted wordcloud for each author to compare their differences in w
 
 ![image](figs/unnamed-chunk-6-1.png)
 
-![](doc/text_mining_files/figure-markdown_github/unnamed-chunk-6-1.png)
-
 Compared to the overall word frequency,
 
 -   EAP used words "length","head","left","matter" (EAP focused more on part of human? Has more word description about human's organ? like "haed","eye","feet","body","hand")
@@ -124,16 +122,13 @@ Compared to the overall word frequency,
 
 TF stands for term frequency or how often a word appears in a text and it is what is studied above in the word cloud. IDF stands for inverse document frequncy, and it is a way to pay more attention to words that are rare within the entire set of text data that is more sophisticated than simply removing stop words. Multiplying these two values together calculates a term's tf-idf, which is the frequency of a term adjusted for how rarely it is used. We'll use tf-idf as a heuristic index to indicate how frequently a certain author uses a word relative to the frequency that ll the authors use the word. Therefore we will find words that are characteristic for a specific author, a good thing to have if we are interested in solving the author identification problem.
 
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![image](figs/unnamed-chunk-7-1.png)
 
 Note that in the above, many of the words recognized by their tf-idf scores are names. This makes sense -- if we see text referencing Raymond, Idris, or Perdita, we know almost for sure that MWS is the author. But some non-names stand out. EAP often uses "monsieur" and "jupiter" while HPL uses the words "bearded" and "attic" more frequently than the others.
 
 We can also look at the most characteristic terms per author.
 
-
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![image](figs/unnamed-chunk-8-1.png)
 
 -   Naturally, we recover our top ranking words such as “Perdita” or “Arkham”. But here we also see that Mary Shelley liked the word “until” while H P Lovecraft wrote about “legends”.
 
@@ -164,8 +159,7 @@ Now we can extract the TF-IDF values.
 
 And then we plot the bigrams with the highest TF-IDF values per *author* and we see that ...
 
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-12-1.png)
+![image](figs/unnamed-chunk-12-1.png)
 
 Um... I have the indistinct feeling that both Poe and Lovecraft are laughing at us. If there is only one thing in the world that should make you feel uneasy, it's probably laughter from those two.
 
@@ -219,8 +213,7 @@ Extracting trigrams follows the same procedure as for bigrams. Again we filter o
 And here is the corresponding TF-IDF plot for the most characteristic terms:
 
 
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-15-1.png)
+![image](figs/unnamed-chunk-15-1.png)
 
 We find:
 
@@ -234,8 +227,7 @@ We find:
 
 This time let's put stopwords into consideration and see whether it could add more interests in their expression.
 
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-16-1.png)
+![image](figs/unnamed-chunk-16-1.png)
 
 We find:
 
@@ -274,14 +266,13 @@ Here comes their "Sentence Ingredients"! This part tell us How Much Special Ingr
 
 First is the number of Capital they used
 
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-18-1.png)
+![image](figs/unnamed-chunk-18-1.png)
 
 -   Seems like EAP used more Capital Letters, but there are also more sentence included in the dataset writen by EAP.(EAP,HPL,MWS :7900,5635,6044) After calculating the Captical Letters Per Sentence, HPL won! EAP and MWS have an average of 2.2 per sentence while HPL has 2.4.
 
 Next comes the number of words in a sentence.
 
-![](text_mining_files/figure-markdown_github/unnamed-chunk-19-1.png)
+![image](figs/unnamed-chunk-19-1.png)
 
 -   HPL has a relatively long sentence than others while MWS occassionaly write some extrmely long sentence.
 
@@ -289,9 +280,7 @@ Next comes the number of words in a sentence.
 
 Then comes number of stopwords in a sentence
 
-
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-20-1.png)
+![image](figs/unnamed-chunk-20-1.png)
 
 -   MWS used less stopwords than other two, which could also be found from her trigram.
 
@@ -306,9 +295,7 @@ Different from negative words in sentiment analysis,including:
 
 I didn't find an existing word list for this. So I just generated a list by myself. Correct me if I am wrong.
 
-
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-21-1.png)
+![image](figs/unnamed-chunk-21-1.png)
 
 -   They almost have the same performance and only EAP may use a little more negation words.
 
@@ -318,9 +305,7 @@ Overall, we could find HPL has a very good writing habit, moderate length, moder
 
 After checking their ingradients, what did they put for the "Flavour"? The bar plot shows the authors with the Total Number of Commas, SemiColons, Colons, Questions used by them. Still, be careful because EAP appeared more ofen than others.
 
-
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-22-1.png)
+![image](figs/unnamed-chunk-22-1.png)
 
 -   HPL cherishes his Commas, Colons and Questions and only used little seasoning...
 
@@ -502,8 +487,7 @@ The plots below show authors with amount of words for different emotions.
 
 First, I plotted relatively "dark" emotions
 
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-27-1.png)
+![image](figs/unnamed-chunk-27-1.png)
 
 -   MWS is quite emotional and used lots of "dark" words.
 
@@ -513,8 +497,7 @@ First, I plotted relatively "dark" emotions
 
 Then, I plotted other emotions in the sentences
 
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-28-1.png)
+![image](figs/unnamed-chunk-28-1.png)
 
 -   MWS also used more "normal" and "light" words than others.
 
@@ -522,9 +505,7 @@ Then, I plotted other emotions in the sentences
 
 Last, I plotted the amount of positive/negative words for each author
 
-
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-29-1.png)
+![image](figs/unnamed-chunk-29-1.png)
 
 -   Overall, seems like MWS used more sentimental words than other authors. Maybe because female author is more likely to express her feeling. HPL used least sentimental words no matter they are positive or negative.
 
@@ -544,8 +525,7 @@ Their total number of words:
 
 Their percentage of emotional words
 
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-31-1.png)
+![image](figs/unnamed-chunk-31-1.png)
 
 -   We could find MWS is quite emotional, Almost 85% of her words(except stopwords) are emotional words, she is almost 25% higher than other two male authors.
 
@@ -553,9 +533,7 @@ Their percentage of emotional words
 
 We put all emotional feelings together now.
 
-
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-32-1.png)
+![image](figs/unnamed-chunk-32-1.png)
 
 -   MWS used Trust, Fear and Sadness most among eight emotional feelings.
 
@@ -627,8 +605,7 @@ head(sentiscore,15)
 
 Then I calculated the average sentence score for each author.
 
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-35-1.png)
+![image](figs/unnamed-chunk-35-1.png)
 
 -   No surprising that HPL has a negative average score.
 
@@ -678,13 +655,11 @@ Used correlation plots to delete variables which have high correlations.
 
 *You may need to download the package **corrplot** to run the code.*
 
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-37-1.png)
+![image](figs/unnamed-chunk-37-1.png)
 
 I found number of words has a high correlation with number of stopwords,so I deleted the number of stop words from the variables. Correlation again.
 
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-38-1.png)
+![image](figs/unnamed-chunk-38-1.png)
 
 Separate dataset into train and test.
 
@@ -1004,8 +979,7 @@ spooky_wrd_topics
 
 We note that in the above we use the `tidy` function to extract the per-topic-per-word probabilities, called "beta" or *β*, for the model. The final output has a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term “content” has a 1.619628 × 10<sup>−5</sup> probability of being generated from topic 4. We visualizae the top terms (meaning the most likely terms associated with each topic) in the following.
 
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-49-1.png)
+![image](figs/unnamed-chunk-49-1.png)
 
 The results of 9 topics is almost the same with the first 9 topics in 12 topics. The next three topics in tutorial has some unique words like "moment" in topic 8; "moon","called" in topic 9; "air" in topic 10. I may check the difference latter.
 
@@ -1045,9 +1019,7 @@ Now that we have these topic probabilities, we can see how well our unsupervised
 
 we can visualize the per-author-per-topic probability for each.
 
-
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-52-1.png)
+![image](figs/unnamed-chunk-52-1.png)
 
 -   MWS showed a perference to topic 1,5,6,7.
 
@@ -1112,8 +1084,7 @@ confused
     ## # ... with 17 more rows
 
 
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-54-1.png)
+![image](figs/unnamed-chunk-54-1.png)
 
 -   Overall, Topics 2 and 9 are common topics among all authors.
 
