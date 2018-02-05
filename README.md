@@ -161,7 +161,7 @@ Let's find how these authors start their sentence. Does anyone of them have some
 
 *According to the frequency, I would select "It was" for EAP and HPL to generate "their" sentences. "I was" will be prepared for MWS *
 
-3. Trigrams
+## 3. Trigrams
 -----------
 
 ### 3.1 Without Stopwords
@@ -209,7 +209,7 @@ We find:
 
 -   MWS gives more information on this part. My father?? My fellow creatures?? I entreat you?? She really loves using person prons in the sentence. Her trigram doesn't seems could be compiled to a spooky novel... It made me feel warm...
 
-4. Feature Engineering
+## 4. Feature Engineering
 ----------------------
 
 We'll do some simple numerical summaries of the data to provide some nice visualizations.Here we add some Features to the `spooky` datasets. The fatures are
@@ -281,7 +281,7 @@ After checking their ingradients, what did they put for the "Flavour"? The bar p
 
 -   MWS is almost wasting Semicolons and Colons compared to others...
 
-5. Sentence Generation
+## 5. Sentence Generation
 ----------------------
 
 In the current example I’m using all the phrases I extracted from the trigrams. And then will use words that follow each other choosing “randomly” but weighted by occurrence.
@@ -443,7 +443,7 @@ generate_sentence("life", "was",trigrams_MWS, 6)
 Part 3 Sentiment Analysis
 =========================
 
-1. Word Level
+## 1. Word Level
 -------------
 
 We examine the following sentiments using `NRC Sentiment lexicon`
@@ -513,7 +513,7 @@ We put all emotional feelings together now.
 
 -   Among those emotional words, Surprise and Disgust appeared less than others
 
-2. Sentence Level
+## 2. Sentence Level
 -----------------
 
 I examine the following sentiments using `afinn Sentiment lexicon`
@@ -771,7 +771,7 @@ accuracy
 
 -   Tried Binary Logistics regression in next part.
 
-2. Binary Logistics Regression
+## 2. Binary Logistics Regression
 ------------------------------
 
 Logistic regression could be used on our data to make binary choices like is it MSW or not. While it seems like one should be able to use three logistic regression models (MSW or not, EAP or not, HPL or not) to classify the text, it won't necessarily be the case that the results of the three models agree.
