@@ -596,7 +596,7 @@ Lowest:
 Part 4 Data Prediction
 ======================
 
-## 1. MultinomialLogistics Regression...
+## 1. Multinomial Logistics Regression...
 -------------------------------------
 
 I tried to use "Ncommas", "Nsemicolumns", "Ncolons", "Ncapital", "Nquestion", "Nwords", "num\_of\_negation\_wrd", "sen\_length" to predict the author...but stuck in this part... I listed some materials I used for the code but I still didn't fully understand the principle of Multinominal Logistics Regression.
@@ -625,7 +625,7 @@ I found number of words has a high correlation with number of stopwords,so I del
 
 ![image](figs/unnamed-chunk-38-1.png)
 
-Separate dataset into train and test.
+Separated dataset into train and test.
 
 
 
@@ -636,16 +636,6 @@ Here comes my nightmare...
 ``` r
 library(nnet)
 mult<-multinom(author~.,data=train)
-```
-
-    ## # weights:  30 (18 variable)
-    ## initial  value 16132.022847 
-    ## iter  10 value 15332.423553
-    ## iter  20 value 15015.983491
-    ## final  value 14950.268598 
-    ## converged
-
-``` r
 summary(mult)
 ```
 
@@ -675,9 +665,6 @@ Used stepwise to get a better model.
 
 ``` r
 stepmult<-step(mult,trace=0)  
-```
-
-``` r
 summary(stepmult)
 ```
 
@@ -761,7 +748,7 @@ accuracy
 
 -   Seems like EAP has a better prediction rate? But the table of result showed that it may because almost 70% of predicted author are EAP. HPL is hard to detect??
 
--   Overall accuracy rate 48.6%. Not better than guess...*(Number may be different when you run the code.)*
+-   Overall accuracy rate 48.6%. Not better than guess...
 
 -   Tried Binary Logistics regression in next part.
 
@@ -772,9 +759,7 @@ Logistic regression could be used on our data to make binary choices like is it 
 
 I will show one example (EAP or Not) here and give the result of the other two.
 
-Prepare the dataset
-
-Conduct regression
+Prepare the dataset & Conduct regression
 
 ``` r
 glm<-glm(author ~.,family="binomial",data=train1)
@@ -850,7 +835,7 @@ summary(stepglm)
 #deleted number of capital words and sentence length
 ```
 
-Predict results
+Predict results.
 
 ``` r
 real <- test1$author
@@ -941,7 +926,7 @@ spooky_wrd_topics
     ## 10     1 idris   0.000491 
     ## # ... with 224,459 more rows
 
-We note that in the above we use the `tidy` function to extract the per-topic-per-word probabilities, called "beta" or *β*, for the model. The final output has a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term “content” has a 1.619628 × 10<sup>−5</sup> probability of being generated from topic 4. We visualizae the top terms (meaning the most likely terms associated with each topic) in the following.
+We note that in the above we use the `tidy` function to extract the per-topic-per-word probabilities, called "beta" or *β*, for the model. The final output has a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. We visualizae the top terms (meaning the most likely terms associated with each topic) in the following.
 
 ![image](figs/unnamed-chunk-49-1.png)
 
