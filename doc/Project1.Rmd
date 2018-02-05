@@ -3,8 +3,8 @@ title: "Some Simple SPOOKY Data Analysis"
 author: "Yujie Hu"
 date: "January 31, 2018"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 # Introduction
@@ -513,11 +513,11 @@ ggplot(spooky_feature) +
        title = 'Total Number of Words') 
 ```
 
-* HPL has a relatively long sentence than others while MWS occassionaly write some extrmely long sentence.
+* HPL has a relatively short sentence than others while MWS occassionaly write some extrmely long sentence.
 
-* HPL is very stable and have a steady performance when add words into his stories while MWS seems very flexible and sometimes may have A Burst of Inspiration??
+* HPL is very stable and have a steady performance when adding words into his stories while MWS seems very flexible and sometimes may have A Burst of Inspiration??
 
-Then comes number of stopwords in a sentence
+Then comes number of stopwords in a sentence.
 
 ```{r,message=FALSE,warning=FALSE}
 nostopword<-as.data.frame(table(spooky_wrdnew$id))
@@ -536,7 +536,7 @@ ggplot(spooky_feature) +
 
 * MWS used less stopwords than other two, which could also be found from her trigram.
 
-At last, it is the number of negation words in a sentence
+At last, it is the number of negation words in a sentence.
 
 **Negation Words**:   
 Different from negative words in sentiment analysis,including:   
@@ -545,7 +545,7 @@ Different from negative words in sentiment analysis,including:
 *Negative verbs*:\  \ doesn’t,isn’t,wasn’t,shouldn’t,wouldn’t,couldn’t,won’t,can’t,don’t  
 *Others*:\  \  \   \  little,few,nor,without,unless...
 
-I didn't find an existing word list for this. So I just generated a list by myself. Correct me if I am wrong.
+I didn't find an existing word list for this. So I generated a list by myself. Correct me if I am wrong.
 
 ```{r,message=FALSE,warning=FALSE}
 negation<-c("no","not","none","nobody","nothing","neither","nowhere","never","hardly","scarcely","barely","doesn't","isn't","wasn't","shouldn't","wouldn't","didn't","won't","can't","little","few","nor","neither","without","unless","wa'n't","dun't","dxn't","aren't","hasn't","couldn't","hadn't","don't","mustn't","ain't","haven't","wudn't","weren't")
@@ -570,7 +570,7 @@ Overall, we could find HPL has a very good writing habit, moderate length, moder
 
 ### 4.2 Sentence Seasoning(Punctuations)
 
-After checking their ingradients, what did they put for the "Flavour"? The bar plot shows the authors with the Total Number of Commas, SemiColons, Colons, Questions used by them. Still, be careful because EAP appeared more ofen than others.
+After checking their ingradients, what did they put for the "Flavour"? The bar plot shows the authors with the Total Number of Commas, SemiColons, Colons, Questions used by them. Still, be careful because EAPs sentence appeared more ofen than others.
 
 ```{r,message=FALSE,warning=FALSE}
 p1<-spooky_feature %>%
@@ -645,9 +645,9 @@ layout <- matrix(c(1, 2, 3, 4), 2, 2, byrow = TRUE)
 multiplot(p1, p2, p3,p4, layout = layout)
 ```
 
-* HPL cherishes his Commas, Colons and Questions and only used little seasoning...
+* HPL cherishes his Commas, Colons and Questions and only used little seasoning.
 
-* MWS is almost wasting Semicolons and Colons compared to others...
+* MWS is almost wasting Semicolons and Colons compared to others.
 
 ## 5. Sentence Generation
 
@@ -729,7 +729,7 @@ generate_sentence("it", "was",trigrams_EAP, 6)
 generate_sentence("it", "was",trigrams_HPL, 6)
 generate_sentence("i", "was",trigrams_MWS, 6)
 ```
-Examples with the most frequent starting words for each author:
+**Examples with the most frequent starting words for each author:**
 
 *EAP 
 
@@ -773,7 +773,7 @@ I didn't get too much insight from the "Machine Sentence" hhh. From my perspecti
 
 We could explore more about how those authors describe the world or life or anything else in their sentence by changing the first two words. This may reflect their attitudes and values.  
 
-How they describe the world
+**How they describe the world**
 ```{r}
 generate_sentence("world", "was",trigrams_EAP, 6)
 generate_sentence("world", "was",trigrams_HPL, 6)
@@ -797,7 +797,7 @@ generate_sentence("world", "was",trigrams_MWS, 6)
 
 [1] "the world is come before dawn i led a young"
 
-How they describe life.
+**How they describe life.**
 ```{r}
 generate_sentence("life", "was",trigrams_EAP, 6)
 generate_sentence("life", "was",trigrams_HPL, 6)
@@ -828,11 +828,11 @@ generate_sentence("life", "was",trigrams_MWS, 6)
 ## 1. Word Level
 
 We examine the following sentiments using `NRC Sentiment lexicon`           
-The NRC Emotion Lexicon is a list of English words and their associations with eight basic emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust) and two sentiments (negative and positive). The annotations were manually done by crowdsourcing."
+The NRC Emotion Lexicon is a list of English words and their associations with eight basic emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust) and two sentiments (negative and positive). The annotations were manually done by crowdsourcing.
 
 From *[Text Mining with R; A Tidy Approach](https://www.tidytextmining.com)*, "When human readers approach text, we use our understanding of the emotional intent of words to infer whether a section of text is positive or negative, or perhaps characterized by some other more nuanced emotion like surprise or disgust.  We can also use the tools of text mining to approach the emotional content of text programmatically."  This is the goal of sentiment analysis.
 
-The plots below show authors with amount of words for different emotions.
+The plots below show authors with different amount of sentiment words.
 
 ```{r, message=FALSE, warning=FALSE}
 plotEmotions = function(emotion,fillColor = fillColor2)
@@ -869,7 +869,7 @@ anticipationplot<-plotEmotions(unique(get_sentiments("nrc")$sentiment)[10])
 layout1 <- matrix(c(1,2,3,4), 2, 2, byrow = TRUE)
 ```
 
-First, I plotted relatively "dark" emotions 
+First, I plotted relatively "dark" emotions.
 ```{r, message=FALSE, warning=FALSE}
 multiplot(disgustplot, fearplot,angerplot,sadnessplot,layout = layout1)
 ```
@@ -880,7 +880,7 @@ multiplot(disgustplot, fearplot,angerplot,sadnessplot,layout = layout1)
 
 * EAP used more Anger and Sadness words in the sentences.
 
-Then, I plotted other emotions in the sentences
+Then, I plotted other emotions in the sentences.
 ```{r, message=FALSE, warning=FALSE}
 multiplot(trustplot, surpriseplot,joyplot,anticipationplot,layout = layout1)
 ```
@@ -889,7 +889,7 @@ multiplot(trustplot, surpriseplot,joyplot,anticipationplot,layout = layout1)
 
 * HPL is always the author used least sentiment words in this plot. Compared to lasst plot, HPL is more frequent to use "dark" sentiment words
 
-Last, I plotted the amount of positive/negative words for each author
+Last, I plotted the amount of positive/negative words for each author.
 ```{r, message=FALSE, warning=FALSE}
 layout2 <- matrix(c(1,2),1, 2, byrow = TRUE)
 multiplot(negativeplot, positiveplot,layout = layout2)
@@ -899,7 +899,7 @@ multiplot(negativeplot, positiveplot,layout = layout2)
 
 Next, I used table and plots to see what percentage of their words are sentimental words.
 
-Their total number of words:
+Their total number of words & percentage of sentiment words:
 ```{r, message=FALSE, warning=FALSE}
 allwords<-as.data.frame(get_sentiments("nrc")$word)
 names(allwords)<-"word"
@@ -922,7 +922,7 @@ totalwrd<-ggplot(emotionwrd, aes(x = author, y = Totalwrd, fill = author)) +
             fontface = 'bold')+
   labs(x = NULL, y = "Total Number of Words") 
 ```
-Their percentage of emotional words
+Their percentage of emotional words.
 ```{r, message=FALSE, warning=FALSE}
 peremowrd<-ggplot(emotionwrd,aes(author,percent,fill = author))+
   geom_bar(stat= 'identity', colour = "black")+ 
@@ -957,14 +957,14 @@ ggplot(count(sentiments, author, sentiment)) +
 
 I examine the following sentiments using `afinn Sentiment lexicon`   
 The AFINN lexicon assigns words with a score that runs between -5 and 5, with negative scores indicating negative sentiment and positive scores indicating positive sentiment.        
-I used "afinn" sentiment lexicon to score the words in the sentence and calculate the average score for the sentence sentiment. 
+I used `afinn sentiment lexicon` to score the words in the sentence and calculate the average score for the sentence sentiment. 
 
-First, I will show some "affinn" score. 
+First, I will show some `affinn` score. 
 ```{r}
 sample_n(get_sentiments("afinn"),10)
 ```
 
-Calculate sentiment scores for each sentence. Showed the highest 10 score among all sentences
+Calculated sentiment scores for each sentence and showed the highest 10 score among all sentences
 
 ```{r,message=FALSE,warning=FALSE}
 sentiment_lines <-spooky_wrd %>%
@@ -984,7 +984,7 @@ sentiscore<-sentiscore[!duplicated(sentiscore),]%>%
 head(sentiscore,15)
 
 ```
-*EAP is way more positive over the setence level tham other authors. Sentences with the highest score are:
+*EAP is way more positive tham other authors over the setence level. Sentences with the highest score are:
 
 **id10196**: "I thought so I knew it hurrah" vociferated Legrand, letting the negro go, and executing a series of curvets and caracols, much to the astonishment of his valet, who, arising from his knees, looked, mutely, from his master to myself, and then from myself to his master.
 
@@ -1009,7 +1009,7 @@ ggplot(data = avescore ,aes(x = factor(author), y = score, fill = author))+
 
 * No surprising that HPL has a negative average score.
 
-* It is a little surprise when I found EAP got the highest score. because MWS is the author who used more positive and good sentiment words in *NRC* lexicon.
+* It is a little surprise when I found EAP got the highest score. because MWS is the author who used more positive and good sentiment words in  `NRC lexicon`.
 
 I listed hightest and lowest score setences of each author here(Selected randomly if there are same scores).
 
@@ -1031,7 +1031,7 @@ Lowest:
 
 # Part 4 Data Prediction
 
-## 1. MultinomialLogistics Regression...
+## 1. Multinomial Logistics Regression...
 
 I tried to use "Ncommas", "Nsemicolumns", "Ncolons", "Ncapital", "Nquestion", "Nwords", "num_of_negation_wrd", "sen_length" to predict the author...but stuck in this part... I listed some materials I used for the code but I still didn't fully understand the principle of Multinominal Logistics Regression.
 
@@ -1123,7 +1123,7 @@ accuracy
 ```
 * Seems like EAP has a better prediction rate? But the table of result showed that it may because almost 70% of predicted author are EAP. HPL is hard to detect??
 
-* Overall accuracy rate 48.6%. Not better than guess...*(Number may be different when you run the code.)*
+* Overall accuracy rate 48.6%. Not better than guess...
 
 * Tried Binary Logistics regression in next part.
 
@@ -1133,7 +1133,7 @@ Logistic regression could be used on our data to make binary choices like is it 
 
 I will show one example (EAP or Not) here and give the result of the other two.
 
-Prepare the dataset
+Prepare the dataset.
 ```{r}
 EAPorNot<-regressiondata
 EAPorNot$author<-as.character(EAPorNot$author)
@@ -1146,7 +1146,7 @@ train1<-EAPorNot[sample1, ]
 test1<-EAPorNot[-sample1, ]
 ```
 
-Conduct regression 
+Conduct regression.
 
 ```{r}
 glm<-glm(author ~.,family="binomial",data=train1)
@@ -1157,7 +1157,7 @@ summary(stepglm)
 #deleted number of capital words and sentence length
 ```
 
-Predict results
+Predict results.
 
 ```{r}
 real <- test1$author
@@ -1199,7 +1199,7 @@ spooky_wrd_topics <- tidy(spooky_wrd_lda, matrix = "beta")
 spooky_wrd_topics
 ```
 
-We note that in the above we use the `tidy` function to extract the per-topic-per-word probabilities, called "beta" or $\beta$, for the model.  The final output has a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term “content” has a $1.619628 \times 10^{-5}$ probability of being generated from topic 4.  We visualizae the top terms (meaning the most likely terms associated with each topic) in the following.
+We note that in the above we use the `tidy` function to extract the per-topic-per-word probabilities, called "beta" or $\beta$, for the model.  The final output has a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. We visualizae the top terms (meaning the most likely terms associated with each topic) in the following.
 
 ```{r}
 spooky_wrd_topics_5 <- ungroup(top_n(group_by(spooky_wrd_topics, topic), 5, beta))%>%
