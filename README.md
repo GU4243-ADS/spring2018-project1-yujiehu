@@ -1,9 +1,10 @@
 Introduction
 ============
 
-This files contains text mining analysis of the SPOOKY data. You should be able to put this file in the `doc` folder of your `Project 1` repository and it should just run (provided you have `multiplot.R` in the `libs` folder and `spooky.csv` in the `data` folder).
+This file is an abstract of the complete report. See the complete version in `doc`.
++ [Complete Version](/doc/Project1.pdf)
 
-**You need to download "corrplot" & "nnet" packages to run the code for part 4.**
+**You need to download "corrplot" & "nnet" packages to run the code for Part 4.**
 
 #### <u>Content Table</u>
 
@@ -62,51 +63,22 @@ This files contains text mining analysis of the SPOOKY data. You should be able 
 Part 1 Data Preparation
 =======================
 
-1. Setup the Libraries
-----------------------
-
-First we want to install and load libraries we need along the way. Note that the following code is completely reproducible -- you don't need to add any code on your own to make it run.
-
-**You need to download "corrplot" & "nnet" packages to run the code for part 4.**
-
-
-2. Read Data
-------------
-
-The following code assumes that the dataset `spooky.csv` lives in a `data` folder (and that we are inside a `docs` folder).
-
-
-
-3. Data Structure Overview
---------------------------
-
-Let's first remind ourselves of the structure of the data.
-
-    ##       id                text              author         
-    ##  Length:19579       Length:19579       Length:19579      
-    ##  Class :character   Class :character   Class :character  
-    ##  Mode  :character   Mode  :character   Mode  :character
-
-
-We see from the above that each row of our data contains a unique ID, a single sentence text excerpt, and an abbreviated author name. `HPL` is Lovecraft, `MWS` is Shelly, and `EAP` is Poe. We finally note that there are no missing values, and we change author name to be a factor variable, which will help us later on.
-
-4. Data Cleaning
-----------------
-
-We first use the `unnest_tokens()` function to drop all punctuation and transform all words into lower case. At least for now, the punctuation isn't really important to our analysis -- we want to study the words. In addition, `tidytext` contains a dictionary of stop words, like "and" or "next", that we will get rid of for our analysis, the idea being that the non-common words (...maybe the SPOOKY words) that the authors use will be more interesting. If this is new to you, here's a textbook that can help: *[Text Mining with R; A Tidy Approach](https://www.tidytextmining.com)*. It teaches the basic handling of natural language data in `R` using tools from the "tidyverse". The tidy text format is a table with one token per row, where a token is a word.
-
+First, we installed and loaded libraries we need along the way.   
+Then, we read the data and had some overview understanding of the data.  
+Next, we cleaned data through droping all punctuation and transform all words into lower case.   
+Finally,there comes to our analysis.
 
 Part 2 Data Exploration
 =======================
 
-1. Unigram
+## 1. Unigram
 ----------
 
 ### 1.1 Word Frequency & Word Cloud
 
 Now we study some of the most common words in the entire data set. With the Tutourial in class, we see that "time", "life", and "night" all appear frequently.
 
-Then, I also plotted wordcloud for each author to compare their differences in word using.
+Then, I plotted wordclouds for each author to compare their differences in word using.
 
 ![image](figs/unnamed-chunk-6-1.png)
 
@@ -114,7 +86,7 @@ Compared to the overall word frequency,
 
 -   EAP used words "length","head","left","matter" (EAP focused more on part of human? Has more word description about human's organ? like "haed","eye","feet","body","hand")
 
--   HPL used words "house","heard","strange","street","told","door" (seems like HPL has more scenary description and created a backgroud place for the horrible story)
+-   HPL used words "house","heard","strange","street","told","door" (Seems like HPL has more scenary description and created a backgroud place for the horrible story)
 
 -   MWS used words "love","heart","raymond","death","father","mind" (MWS used more inner feeling and more abstract word like "spirit","hope"...)
 
@@ -136,7 +108,7 @@ We can also look at the most characteristic terms per author.
 
 Too many arcane words in this section... I have a hard time searching their meanings, Still Couldn't Understand what they want to convey without context...Maybe in next parts it will reveal more interesting facts.
 
-2. Bigrams
+## 2. Bigrams
 ----------
 
 ### 2.1 TF-IDF
