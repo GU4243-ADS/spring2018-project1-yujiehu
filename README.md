@@ -177,9 +177,7 @@ Let's find how these authors start their sentence. Does anyone of them have some
 
 *I will use these first words to to generate sentence for each author in the Part 2 (5).Hope It could seem like their own style and become another "spooky novel" *
 
-
-
-![](text_mining_files/figure-markdown_github/unnamed-chunk-13-1.png)
+![image](figs/unnamed-chunk-13-1.png)
 
 "It was" is the most popular way to start the sentence for all of these authors. Then come "In the","I was","I had","It is","He was","There was". Seems like my writing style... Simple and nothing special. But when we have a closer look for each author,there comes difference!
 
