@@ -1,9 +1,10 @@
 Introduction
 ============
 
-This files contains text mining analysis of the SPOOKY data. You should be able to put this file in the `doc` folder of your `Project 1` repository and it should just run (provided you have `multiplot.R` in the `libs` folder and `spooky.csv` in the `data` folder).
+This file is an abstract of the complete report. See the complete version in `doc`.
++ [Complete Version](/doc/Project1.pdf)
 
-**You need to download "corrplot" & "nnet" packages to run the code for part 4.**
+**You need to download "corrplot" & "nnet" packages to run the code for Part 4.**
 
 #### <u>Content Table</u>
 
@@ -25,25 +26,25 @@ This files contains text mining analysis of the SPOOKY data. You should be able 
 
 -   TF-IDF
 
-1.  Bigram
+2.  Bigram
 
 -   TF-IDF
 
 -   First Two Words(Will be used for sentence generation)
 
-1.  Trigram
+3.  Trigram
 
 -   Without Stopwords
 
 -   With Stopwords
 
-1.  Feature Engineering
+4.  Feature Engineering
 
 -   Sentence Ingredients
 
 -   Sentence Seasoning(Punctuations)
 
-1.  Sentence Generation
+5.  Sentence Generation
 
 **Part 3 Sentiment Analysis**
 
@@ -62,51 +63,22 @@ This files contains text mining analysis of the SPOOKY data. You should be able 
 Part 1 Data Preparation
 =======================
 
-1. Setup the Libraries
-----------------------
-
-First we want to install and load libraries we need along the way. Note that the following code is completely reproducible -- you don't need to add any code on your own to make it run.
-
-**You need to download "corrplot" & "nnet" packages to run the code for part 4.**
-
-
-2. Read Data
-------------
-
-The following code assumes that the dataset `spooky.csv` lives in a `data` folder (and that we are inside a `docs` folder).
-
-
-
-3. Data Structure Overview
---------------------------
-
-Let's first remind ourselves of the structure of the data.
-
-    ##       id                text              author         
-    ##  Length:19579       Length:19579       Length:19579      
-    ##  Class :character   Class :character   Class :character  
-    ##  Mode  :character   Mode  :character   Mode  :character
-
-
-We see from the above that each row of our data contains a unique ID, a single sentence text excerpt, and an abbreviated author name. `HPL` is Lovecraft, `MWS` is Shelly, and `EAP` is Poe. We finally note that there are no missing values, and we change author name to be a factor variable, which will help us later on.
-
-4. Data Cleaning
-----------------
-
-We first use the `unnest_tokens()` function to drop all punctuation and transform all words into lower case. At least for now, the punctuation isn't really important to our analysis -- we want to study the words. In addition, `tidytext` contains a dictionary of stop words, like "and" or "next", that we will get rid of for our analysis, the idea being that the non-common words (...maybe the SPOOKY words) that the authors use will be more interesting. If this is new to you, here's a textbook that can help: *[Text Mining with R; A Tidy Approach](https://www.tidytextmining.com)*. It teaches the basic handling of natural language data in `R` using tools from the "tidyverse". The tidy text format is a table with one token per row, where a token is a word.
-
+First, we installed and loaded libraries we need along the way.   
+Then, we read the data and had some overview understanding of the data.  
+Next, we cleaned data through droping all punctuation and transform all words into lower case.   
+Finally, here comes to our analysis.
 
 Part 2 Data Exploration
 =======================
 
-1. Unigram
+## 1. Unigram
 ----------
 
 ### 1.1 Word Frequency & Word Cloud
 
 Now we study some of the most common words in the entire data set. With the Tutourial in class, we see that "time", "life", and "night" all appear frequently.
 
-Then, I also plotted wordcloud for each author to compare their differences in word using.
+Then, I plotted wordclouds for each author to compare their differences in word using.
 
 ![image](figs/unnamed-chunk-6-1.png)
 
@@ -114,13 +86,13 @@ Compared to the overall word frequency,
 
 -   EAP used words "length","head","left","matter" (EAP focused more on part of human? Has more word description about human's organ? like "haed","eye","feet","body","hand")
 
--   HPL used words "house","heard","strange","street","told","door" (seems like HPL has more scenary description and created a backgroud place for the horrible story)
+-   HPL used words "house","heard","strange","street","told","door" (Seems like HPL has more scenary description and created a backgroud place for the horrible story)
 
 -   MWS used words "love","heart","raymond","death","father","mind" (MWS used more inner feeling and more abstract word like "spirit","hope"...)
 
 ### 1.2 TF-IDF
 
-TF stands for term frequency or how often a word appears in a text and it is what is studied above in the word cloud. IDF stands for inverse document frequncy, and it is a way to pay more attention to words that are rare within the entire set of text data that is more sophisticated than simply removing stop words. Multiplying these two values together calculates a term's tf-idf, which is the frequency of a term adjusted for how rarely it is used. We'll use tf-idf as a heuristic index to indicate how frequently a certain author uses a word relative to the frequency that ll the authors use the word. Therefore we will find words that are characteristic for a specific author, a good thing to have if we are interested in solving the author identification problem.
+TF stands for term frequency or how often a word appears in a text and it is what is studied above in the word cloud. IDF stands for inverse document frequncy, and it is a way to pay more attention to words that are rare within the entire set of text data that is more sophisticated than simply removing stop words. Multiplying these two values together calculates a term's tf-idf, which is the frequency of a term adjusted for how rarely it is used. We'll use tf-idf as a heuristic index to indicate how frequently a certain author uses a word relative to the frequency that other authors use the word. Therefore we will find words that are characteristic for a specific author, a good thing to have if we are interested in solving the author identification problem.
 
 ![image](figs/unnamed-chunk-7-1.png)
 
@@ -136,7 +108,7 @@ We can also look at the most characteristic terms per author.
 
 Too many arcane words in this section... I have a hard time searching their meanings, Still Couldn't Understand what they want to convey without context...Maybe in next parts it will reveal more interesting facts.
 
-2. Bigrams
+## 2. Bigrams
 ----------
 
 ### 2.1 TF-IDF
@@ -175,28 +147,26 @@ We also find:
 
 Let's find how these authors start their sentence. Does anyone of them have some special writing style to surperise you at the first sight?
 
-*I will use these first words to to generate sentence for each author in the Part 2 (5).Hope It could seem like their own style and become another "spooky novel" *
+*I will use these first words to to generate sentence for each author in the Part 2 (5). Hope It could seem like their own style and become another "spooky novel".*
 
 ![image](figs/unnamed-chunk-13-1.png)
 
-"It was" is the most popular way to start the sentence for all of these authors. Then come "In the","I was","I had","It is","He was","There was". Seems like my writing style... Simple and nothing special. But when we have a closer look for each author,there comes difference!
+"It was" is the most popular way to start the sentence for all of these authors. Then come "In the", "I was", "I had", "It is", "He was", "There was". Seems like my writing style... Simple and nothing special. But when we have a closer look at each author,there comes difference!
 
 -   EAP and HPL have very similar Starting Words, EAP used more "In the" and "It is" than HPL. Souds like EAP has more to explain in the sentence and stored lots of information.
 
 -   EAP seems like the most normal author when starting the sentence, EAP almost has no "own" starting words while HPL has a perference for "As the","It had","There were","Then he","The old","I did"
 
--   MWS seems has her own style to start the sentence. MWS used a small percentage common words for starting. She showed a strong love to start with "I was","I shall","I had","We were","I cannot","But I"... She usually start with Personal Pronouns, especially "I". Maybe MWS made more efforts to make readers have similar feeling with her or get addicted to her stories?
+-   MWS seems has her own style to start the sentence. MWS used a small percentage common words for starting. She showed a strong love to start with "I was", "I shall", "I had", "We were", "I cannot", "But I"... She usually start with Personal Pronouns, especially "I". Maybe MWS made more efforts to make readers have similar feeling with her or get addicted to her stories?
 
-*According to the frequency, I would select "It was" for EAP and HPL to generate "their" sentences. "I was" will be prepared for MWS *
+*According to the frequency, I would select "It was" for EAP and HPL to generate "their" sentences. "I was" will be prepared for MWS.*
 
-3. Trigrams
+## 3. Trigrams
 -----------
 
 ### 3.1 Without Stopwords
 
 *Three is a magical number. A terrible number. There were 3 witches to foretell Macbeth his blood-drenched destiny. The devil hound Cerberus has 3 heads. The number of the beast is 3 times the number 3+3. All these warning signs try to reach our concience as we prepare to repeat the same analysis we had done for bigrams on their cousins thrice removed: trigrams.*
-
-*Blind for knowledge, yielding to the call of power just like the sorcerer's apprentice, we continue our study. We crave to know more. A little spark of reason and self-preservation is trying to make itself heard against the raging thirst in our brains, but it burns ever weaker as the candle, is it still a candle?, shines brighter and brighter.*
 
 Extracting trigrams follows the same procedure as for bigrams. Again we filter out stop words and include a few random examples:
 
@@ -231,16 +201,18 @@ We find:
 
 -   EAP and HPL are still similar for their writing styles. Their trigrams are almost all conjunctions which didn't provide much information
 
--   EAP used "three or four" frequently. Checking back to the original sentences, what follows the quantitive amout is usually time("weeks","hours","days"...). Seems like EAP tends to describe things vaguely and create some unclear concepts for reader to guess?
+-   EAP used "three or four" frequently. Checking back to the original sentences, what follows the quantitive amout is usually time("weeks", "hours", "days"...). Seems like EAP tends to describe things vaguely and create some unclear concepts for reader to guess?
 
 -   HPL are fond of houses! Could he afford his own house back to his time? The high house price made him scary so he made some virtural houses in his stories ??
 
 -   MWS gives more information on this part. My father?? My fellow creatures?? I entreat you?? She really loves using person prons in the sentence. Her trigram doesn't seems could be compiled to a spooky novel... It made me feel warm...
 
-4. Feature Engineering
+## 4. Feature Engineering
 ----------------------
 
-We'll do some simple numerical summaries of the data to provide some nice visualizations.Here we add some Features to the `spooky` datasets. The fatures are
+We may find some traces how these author *"Cooking"* their horrible books through some simple numerical summaries of the data.  
+
+Here we add some Features to the `spooky` datasets. The fatures are
 
 -   Number of commas, semicolons, colons, questions
 
@@ -252,46 +224,42 @@ We'll do some simple numerical summaries of the data to provide some nice visual
 
 -   Sentence length(characters); Word length(characters)
 
-We may find some traces how these author *cooking* their horrible books!
-
-Some these features have been borrowed from Kaggler *jayjay* 's kernel found [here](https://www.kaggle.com/jayjay75/text2vec-glmnet). Great work jayjay!
-
-
+*Some these features have been borrowed from Kaggler *jayjay* 's kernel found [here](https://www.kaggle.com/jayjay75/text2vec-glmnet). Great work jayjay!*
 
 ### 4.1 Sentence Ingredients
 
-Here comes their "Sentence Ingredients"! This part tell us How Much Special Ingredients they Add in Their Stories.
+Here comes their "Sentence Ingredients"! This part tells us How Much Special Ingredients They Add in Their Stories.
 
-First is the number of Capital they used
+First is the number of Capital they used.
 
 ![image](figs/unnamed-chunk-18-1.png)
 
--   Seems like EAP used more Capital Letters, but there are also more sentence included in the dataset writen by EAP.(EAP,HPL,MWS :7900,5635,6044) After calculating the Captical Letters Per Sentence, HPL won! EAP and MWS have an average of 2.2 per sentence while HPL has 2.4.
+-   Seems like EAP used more Capital Letters, but there are also more sentence included in the dataset writen by EAP.(EAP,HPL,MWS : 7900,5635,6044) After calculating the Captical Letters Per Sentence, HPL won! EAP and MWS have an average of 2.2 per sentence while HPL has 2.4.
 
 Next comes the number of words in a sentence.
 
 ![image](figs/unnamed-chunk-19-1.png)
 
--   HPL has a relatively long sentence than others while MWS occassionaly write some extrmely long sentence.
+-   HPL has a relatively short sentence than others while MWS occassionaly write some extrmely long sentence.
 
--   HPL is very stable and have a steady performance when add words into his stories while MWS seems very flexible and sometimes may have A Burst of Inspiration??
+-   HPL is very stable and have a steady performance when adding words into his stories while MWS seems very flexible and sometimes may have A Burst of Inspiration??
 
-Then comes number of stopwords in a sentence
+Then comes number of stopwords in a sentence.
 
 ![image](figs/unnamed-chunk-20-1.png)
 
 -   MWS used less stopwords than other two, which could also be found from her trigram.
 
-At last, it is the number of negation words in a sentence
+At last, it is the number of negation words in a sentence.
 
 **Negation Words**:
-Different from negative words in sentiment analysis,including:
-*Negative words*:   no,not,none,no one,nobody,nothing,neither,nowhere,never
-*Negative Adverbs*: hardly,scarcely,barely
-*Negative verbs*:   doesn’t,isn’t,wasn’t,shouldn’t,wouldn’t,couldn’t,won’t,can’t,don’t
-*Others*:        little,few,nor,without,unless...
+Different from negative words in sentiment analysis,including:  
+*Negative words*:    no,not,none,no one,nobody,nothing,neither,nowhere,never  
+*Negative Adverbs*: hardly,scarcely,barely  
+*Negative verbs*:   doesn’t,isn’t,wasn’t,shouldn’t,wouldn’t,couldn’t,won’t,can’t,don’t  
+*Others*:           little,few,nor,without,unless...  
 
-I didn't find an existing word list for this. So I just generated a list by myself. Correct me if I am wrong.
+I didn't find an existing word list for this. So I generated a list by myself. Correct me if I am wrong.
 
 ![image](figs/unnamed-chunk-21-1.png)
 
@@ -301,15 +269,15 @@ Overall, we could find HPL has a very good writing habit, moderate length, moder
 
 ### 4.2 Sentence Seasoning(Punctuations)
 
-After checking their ingradients, what did they put for the "Flavour"? The bar plot shows the authors with the Total Number of Commas, SemiColons, Colons, Questions used by them. Still, be careful because EAP appeared more ofen than others.
+After checking their ingradients, what did they put for the "Flavour"? The bar plot shows the authors with the Total Number of Commas, SemiColons, Colons, Questions used by them. Still, be careful because EAP's sentence appeared more ofen than others.
 
 ![image](figs/unnamed-chunk-22-1.png)
 
--   HPL cherishes his Commas, Colons and Questions and only used little seasoning...
+-   HPL cherishes his Commas, Colons and Questions and only used little seasoning.
 
--   MWS is almost wasting Semicolons and Colons compared to others...
+-   MWS is almost wasting Semicolons and Colons compared to others.
 
-5. Sentence Generation
+## 5. Sentence Generation
 ----------------------
 
 In the current example I’m using all the phrases I extracted from the trigrams. And then will use words that follow each other choosing “randomly” but weighted by occurrence.
@@ -343,7 +311,7 @@ generate_sentence("i", "was",trigrams_MWS, 6)
 
     ## [1] "i was led by my sudden"
 
-Examples with the most frequent starting words for each author:
+**Examples with the most frequent starting words for each author:**
 
 \*EAP
 
@@ -387,7 +355,7 @@ I didn't get too much insight from the "Machine Sentence" hhh. From my perspecti
 
 We could explore more about how those authors describe the world or life or anything else in their sentence by changing the first two words. This may reflect their attitudes and values.
 
-How they describe the world
+**How they describe the world**
 
 ``` r
 generate_sentence("world", "was",trigrams_EAP, 6)
@@ -425,7 +393,7 @@ generate_sentence("world", "was",trigrams_MWS, 6)
 
 \[1\] "the world is come before dawn i led a young"
 
-How they describe life.
+**How they describe life.**
 
 ``` r
 generate_sentence("life", "was",trigrams_EAP, 6)
@@ -443,10 +411,8 @@ generate_sentence("life", "was",trigrams_HPL, 6)
 generate_sentence("life", "was",trigrams_MWS, 6)
 ```
 
-    ## [1] "Change the starting words or sentence length you inputed/Rerun the code"
-    ## [1] "Change the starting words or sentence length you inputed/Rerun the code"
-
-    ## [1] "life was now doing Change the starting words or sentence length you inputed/Rerun the code Change the starting words or sentence length you inputed/Rerun the code"
+ 
+    ## [1] "life was now doing Change the starting words or sentence length you inputed/Rerun the code "
 
 \*EAP
 
@@ -471,19 +437,19 @@ generate_sentence("life", "was",trigrams_MWS, 6)
 Part 3 Sentiment Analysis
 =========================
 
-1. Word Level
+## 1. Word Level
 -------------
 
 We examine the following sentiments using `NRC Sentiment lexicon`
-The NRC Emotion Lexicon is a list of English words and their associations with eight basic emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust) and two sentiments (negative and positive). The annotations were manually done by crowdsourcing."
+The NRC Emotion Lexicon is a list of English words and their associations with eight basic emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust) and two sentiments (negative and positive). The annotations were manually done by crowdsourcing.
 
 From *[Text Mining with R; A Tidy Approach](https://www.tidytextmining.com)*, "When human readers approach text, we use our understanding of the emotional intent of words to infer whether a section of text is positive or negative, or perhaps characterized by some other more nuanced emotion like surprise or disgust. We can also use the tools of text mining to approach the emotional content of text programmatically." This is the goal of sentiment analysis.
 
-The plots below show authors with amount of words for different emotions.
+The plots below show authors with different amount of sentiment words.
 
 
 
-First, I plotted relatively "dark" emotions
+First, I plotted relatively "dark" emotions.
 
 ![image](figs/unnamed-chunk-27-1.png)
 
@@ -493,7 +459,7 @@ First, I plotted relatively "dark" emotions
 
 -   EAP used more Anger and Sadness words in the sentences.
 
-Then, I plotted other emotions in the sentences
+Then, I plotted other emotions in the sentences.
 
 ![image](figs/unnamed-chunk-28-1.png)
 
@@ -501,7 +467,7 @@ Then, I plotted other emotions in the sentences
 
 -   HPL is always the author used least sentiment words in this plot. Compared to lasst plot, HPL is more frequent to use "dark" sentiment words
 
-Last, I plotted the amount of positive/negative words for each author
+Last, I plotted the amount of positive/negative words for each author.
 
 ![image](figs/unnamed-chunk-29-1.png)
 
@@ -509,7 +475,7 @@ Last, I plotted the amount of positive/negative words for each author
 
 Next, I used table and plots to see what percentage of their words are sentimental words.
 
-Their total number of words:
+Their total number of words & percentage of sentiment words:
 
 
     ## # A tibble: 3 x 4
@@ -521,7 +487,7 @@ Their total number of words:
 
 
 
-Their percentage of emotional words
+Their percentage of emotional words.
 
 ![image](figs/unnamed-chunk-31-1.png)
 
@@ -541,14 +507,14 @@ We put all emotional feelings together now.
 
 -   Among those emotional words, Surprise and Disgust appeared less than others
 
-2. Sentence Level
+## 2. Sentence Level
 -----------------
 
 I examine the following sentiments using `afinn Sentiment lexicon`
 The AFINN lexicon assigns words with a score that runs between -5 and 5, with negative scores indicating negative sentiment and positive scores indicating positive sentiment.
-I used "afinn" sentiment lexicon to score the words in the sentence and calculate the average score for the sentence sentiment.
+I used `afinn sentiment lexicon` to score the words in the sentence and calculate the average score for the sentence sentiment.
 
-First, I will show some "affinn" score.
+First, I will show some `affinn score.
 
 ``` r
 sample_n(get_sentiments("afinn"),10)
@@ -568,7 +534,7 @@ sample_n(get_sentiments("afinn"),10)
     ##  9 join             1
     ## 10 perpetrators    -2
 
-Calculate sentiment scores for each sentence. Showed the highest 15 score among all sentences
+Calculated sentiment scores for each sentence and showed the highest 15 score among all sentences
 
 ``` r
 head(sentiscore,15)
@@ -593,7 +559,7 @@ head(sentiscore,15)
     ## 14 id21073      4.00 HPL   
     ## 15 id08642      4.00 MWS
 
-\*EAP is way more positive over the setence level tham other authors. Sentences with the highest score are:
+\*EAP is way more positive than other authors over the setence level. Sentences with the highest score are:
 
 **id10196**: "I thought so I knew it hurrah" vociferated Legrand, letting the negro go, and executing a series of curvets and caracols, much to the astonishment of his valet, who, arising from his knees, looked, mutely, from his master to myself, and then from myself to his master.
 
@@ -607,7 +573,7 @@ Then I calculated the average sentence score for each author.
 
 -   No surprising that HPL has a negative average score.
 
--   It is a little surprise when I found EAP got the highest score. because MWS is the author who used more positive and good sentiment words in *NRC* lexicon.
+-   It is a little surprise when I found EAP got the highest score. because MWS is the author who used more positive and good sentiment words in `NRC lexicon`.
 
 I listed hightest and lowest score setences of each author here(Selected randomly if there are same scores).
 
@@ -630,7 +596,7 @@ Lowest:
 Part 4 Data Prediction
 ======================
 
-1. MultinomialLogistics Regression...
+## 1. Multinomial Logistics Regression...
 -------------------------------------
 
 I tried to use "Ncommas", "Nsemicolumns", "Ncolons", "Ncapital", "Nquestion", "Nwords", "num\_of\_negation\_wrd", "sen\_length" to predict the author...but stuck in this part... I listed some materials I used for the code but I still didn't fully understand the principle of Multinominal Logistics Regression.
@@ -659,7 +625,7 @@ I found number of words has a high correlation with number of stopwords,so I del
 
 ![image](figs/unnamed-chunk-38-1.png)
 
-Separate dataset into train and test.
+Separated dataset into train and test.
 
 
 
@@ -670,16 +636,6 @@ Here comes my nightmare...
 ``` r
 library(nnet)
 mult<-multinom(author~.,data=train)
-```
-
-    ## # weights:  30 (18 variable)
-    ## initial  value 16132.022847 
-    ## iter  10 value 15332.423553
-    ## iter  20 value 15015.983491
-    ## final  value 14950.268598 
-    ## converged
-
-``` r
 summary(mult)
 ```
 
@@ -709,9 +665,6 @@ Used stepwise to get a better model.
 
 ``` r
 stepmult<-step(mult,trace=0)  
-```
-
-``` r
 summary(stepmult)
 ```
 
@@ -795,20 +748,18 @@ accuracy
 
 -   Seems like EAP has a better prediction rate? But the table of result showed that it may because almost 70% of predicted author are EAP. HPL is hard to detect??
 
--   Overall accuracy rate 48.6%. Not better than guess...*(Number may be different when you run the code.)*
+-   Overall accuracy rate 48.6%. Not better than guess...
 
 -   Tried Binary Logistics regression in next part.
 
-2. Binary Logistics Regression
+## 2. Binary Logistics Regression
 ------------------------------
 
 Logistic regression could be used on our data to make binary choices like is it MSW or not. While it seems like one should be able to use three logistic regression models (MSW or not, EAP or not, HPL or not) to classify the text, it won't necessarily be the case that the results of the three models agree.
 
 I will show one example (EAP or Not) here and give the result of the other two.
 
-Prepare the dataset
-
-Conduct regression
+Prepare the dataset & Conduct regression
 
 ``` r
 glm<-glm(author ~.,family="binomial",data=train1)
@@ -884,7 +835,7 @@ summary(stepglm)
 #deleted number of capital words and sentence length
 ```
 
-Predict results
+Predict results.
 
 ``` r
 real <- test1$author
@@ -975,7 +926,7 @@ spooky_wrd_topics
     ## 10     1 idris   0.000491 
     ## # ... with 224,459 more rows
 
-We note that in the above we use the `tidy` function to extract the per-topic-per-word probabilities, called "beta" or *β*, for the model. The final output has a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. For example, the term “content” has a 1.619628 × 10<sup>−5</sup> probability of being generated from topic 4. We visualizae the top terms (meaning the most likely terms associated with each topic) in the following.
+We note that in the above we use the `tidy` function to extract the per-topic-per-word probabilities, called "beta" or *β*, for the model. The final output has a one-topic-per-term-per-row format. For each combination, the model computes the probability of that term being generated from that topic. We visualizae the top terms (meaning the most likely terms associated with each topic) in the following.
 
 ![image](figs/unnamed-chunk-49-1.png)
 
